@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GITARA BRANCH - Test Supabase Connection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #047857 0%, #10b981 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #047857;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .test-section {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .test-section h2 {
+            color: #1f2937;
+            font-size: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .status.pending {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #fbbf24;
+        }
+
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #047857;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        button {
+            width: 100%;
+            padding: 14px 24px;
+            background: #047857;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #065f46;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .details {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #374151;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .check-icon {
+            color: #10b981;
+        }
+
+        .x-icon {
+            color: #ef4444;
+        }
+
+        .info {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .info h3 {
+            color: #1e40af;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .info p {
+            color: #1e3a8a;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .info a {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇺🇬 GITARA BRANCH</h1>
+            <p>Supabase Connection Test</p>
+        </div>
+
+        <div class="test-section">
+            <h2>
+                <span>🔌</span>
+                Connection Status
+            </h2>
+            
+            <div id="configStatus" class="status pending">
+                <div class="spinner"></div>
+                <span>Checking configuration...</span>
+            </div>
+
+            <div id="healthStatus" class="status pending" style="display: none;">
+                <div class="spinner"></div>
+                <span>Testing backend connection...</span>
+            </div>
+
+            <div id="details" class="details" style="display: none;"></div>
+        </div>
+
+        <button id="retryBtn" onclick="testConnection()" disabled>
+            Test Connection
+        </button>
+
+        <div class="info">
+            <h3>📋 Deployment Steps</h3>
+            <p>
+                1. Run SQL script in <a href="https://supabase.com/dashboard/project/zruzetnnneigombftzlj/sql/new" target="_blank">Supabase SQL Editor</a><br>
+                2. Deploy Edge Function to <a href="https://supabase.com/dashboard/project/zruzetnnneigombftzlj/functions" target="_blank">Supabase Functions</a><br>
+                3. Add 3 environment secrets<br>
+                <br>
+                <strong>See /SUPABASE_CONNECTION_STEPS.md for details</strong>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            projectId: 'zruzetnnneigombftzlj',
+            url: 'https://zruzetnnneigombftzlj.supabase.co',
+            publicAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpydXpldG5ubmVpZ29tYmZ0emxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MTYxNzEsImV4cCI6MjA4NTk5MjE3MX0.yfWHsGXYchHtm7CRmg8znlFfx2W_bI_fydvb5whn0QM',
+        };
+
+        async function testConnection() {
+            const retryBtn = document.getElementById('retryBtn');
+            const configStatus = document.getElementById('configStatus');
+            const healthStatus = document.getElementById('healthStatus');
+            const details = document.getElementById('details');
+
+            // Disable button
+            retryBtn.disabled = true;
+
+            // Step 1: Check configuration
+            configStatus.className = 'status pending';
+            configStatus.innerHTML = '<div class="spinner"></div><span>Checking configuration...</span>';
+            details.style.display = 'none';
+
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            const isConfigured = CONFIG.projectId && CONFIG.url && CONFIG.publicAnonKey;
+
+            if (!isConfigured) {
+                configStatus.className = 'status error';
+                configStatus.innerHTML = '<span class="x-icon">✖</span><span>Configuration missing!</span>';
+                details.style.display = 'block';
+                details.textContent = 'ERROR: Supabase credentials not configured.\n\nCheck /src/app/config/supabase.ts';
+                retryBtn.disabled = false;
+                return;
+            }
+
+            configStatus.className = 'status success';
+            configStatus.innerHTML = '<span class="check-icon">✓</span><span>Configuration OK</span>';
+
+            // Step 2: Test health check
+            healthStatus.style.display = 'block';
+            healthStatus.className = 'status pending';
+            healthStatus.innerHTML = '<div class="spinner"></div><span>Testing backend connection...</span>';
+
+            try {
+                const healthUrl = `${CONFIG.url}/functions/v1/make-server-68baa523/health`;
+                
+                const response = await fetch(healthUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${CONFIG.publicAnonKey}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                healthStatus.className = 'status success';
+                healthStatus.innerHTML = '<span class="check-icon">✓</span><span>Backend Connected!</span>';
+
+                details.style.display = 'block';
+                details.textContent = `SUCCESS! ✅\n\nBackend is healthy and responding.\n\nResponse:\n${JSON.stringify(data, null, 2)}\n\nYour GITARA BRANCH is ready to use!`;
+
+            } catch (error) {
+                healthStatus.className = 'status error';
+                healthStatus.innerHTML = '<span class="x-icon">✖</span><span>Backend connection failed</span>';
+
+                details.style.display = 'block';
+                details.textContent = `ERROR: ${error.message}\n\nPossible causes:\n1. Edge Function not deployed yet\n2. Environment secrets not set\n3. Function name incorrect\n\nSee /SUPABASE_CONNECTION_STEPS.md for deployment steps.`;
+            }
+
+            retryBtn.disabled = false;
+        }
+
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            document.getElementById('retryBtn').disabled = false;
+            testConnection();
+        });
+    </script>
+</body>
+</html>
