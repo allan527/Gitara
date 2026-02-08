@@ -1,468 +1,261 @@
-# 🏦 William Loans - Personal Loan Management System
+# 🏦 GITARA BRANCH - Personal Loan Management System
 
-A comprehensive loan management dashboard for internal use in Uganda, handling personal loans with UGX currency formatting and automated interest calculations.
-
-![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
-![Database](https://img.shields.io/badge/Database-PostgreSQL-blue)
-![Backend](https://img.shields.io/badge/Backend-Integrated-success)
+**A complete loan management dashboard for Uganda, handling personal loans with UGX currency formatting and 20% monthly interest.**
 
 ---
 
-## 🎯 Overview
+## ✨ **FEATURES**
 
-William Loans is a full-stack fintech application designed specifically for managing personal loans in Uganda. The system automatically calculates 20% monthly interest, divides repayments into daily payments over 30 days, and provides comprehensive tracking of all financial transactions.
+### 📊 **Dashboard**
+- Real-time KPIs (Total Loans, Active Clients, Collections, Outstanding Balance)
+- Recent transactions view
+- Quick stats and analytics
 
-### Key Features
+### 👥 **Client Management**
+- Add, edit, view, and delete clients
+- Track loan history per client
+- View client payment history
+- Client allocation tracking
 
-- 📊 **Dashboard** - Real-time KPIs, charts, and business insights
-- 👥 **Client Management** - Complete CRUD operations for loan clients
-- 💰 **Payment Tracking** - Record and monitor daily loan repayments
-- 📒 **Cashbook** - Track all income and expenses
-- 📜 **Transaction History** - Comprehensive payment archives with PDF downloads
-- 🔐 **Authentication** - Role-based access control (Boss, Cashier, Field Officer)
-- 💼 **Owner Capital** - Special handling for capital injections and withdrawals
-- 📱 **Responsive Design** - Works perfectly on desktop and mobile
-- 🗄️ **Proper Database Schema** - PostgreSQL tables with foreign keys and indexes
+### 💰 **Transaction Management**
+- Record loan payments
+- Automatic interest calculation (20% monthly over 30 days)
+- Balance tracking
+- Payment receipts with PDF download
+
+### 📒 **Cashbook**
+- Income and expense tracking
+- Processing fees tracking
+- Owner capital injection/withdrawal
+- Profit/loss calculation
+
+### 👤 **Owner Capital Management**
+- Capital injection tracking
+- Owner withdrawal tracking
+- Separate from client loan system
+
+### 🔐 **Security Features**
+- Owner-only permissions (only william@boss.com can edit/delete)
+- Role-based access control
+- Session persistence
 
 ---
 
-## 🚀 Quick Start
+## 🎨 **DESIGN**
 
-### 1. Clone & Install
+- **Color Scheme:** Emerald green (#047857, #10b981)
+- **UI:** Clean fintech style with soft mint backgrounds
+- **Responsive:** Full mobile, tablet, and desktop support
+- **Components:** Rounded cards with modern shadows
 
+---
+
+## 💾 **DATA STORAGE**
+
+**LocalStorage Mode (Current)**
+- All data saved in browser localStorage
+- Persists across page refreshes
+- Works offline
+- No backend required
+
+---
+
+## 🚀 **QUICK START**
+
+### **1. Clone & Install**
 ```bash
+# Clone the repository
+git clone <your-repo-url>
+cd gitara-branch
+
 # Install dependencies
 npm install
 ```
 
-### 2. Deploy Backend
-
-```bash
-# Make the deploy script executable
-chmod +x deploy.sh
-
-# Run deployment
-./deploy.sh
-```
-
-Or manually:
-
-```bash
-# Install Supabase CLI
-npm install -g supabase
-
-# Login to Supabase
-supabase login
-
-# Link to your project
-supabase link --project-ref tmelmmhephgyzccezfgd
-
-# Deploy the edge function
-supabase functions deploy server
-```
-
-### 3. Start Development Server
-
+### **2. Run Development Server**
 ```bash
 npm run dev
 ```
 
-### 4. Login
-
-Use any of these credentials:
-
-| Email | Password | Role | Access Level |
-|-------|----------|------|--------------|
-| `william@boss.com` | `admin@123` | Boss | Full access, edit all data |
-| `cashier.com` | `admin@123` | Cashier | Record payments, view data |
-| `field.com` | `admin@123` | Field Officer | View clients, record payments |
-
----
-
-## 🏗️ Architecture
-
+### **3. Open in Browser**
 ```
-React Frontend (Vite + TypeScript)
-        ↓
-API Service Layer (/src/services/api.ts)
-        ↓
-Supabase Edge Function (Hono Server)
-        ↓
-PostgreSQL Database (kv_store_68baa523)
+http://localhost:5173
 ```
 
-**Full architecture details:** See [ARCHITECTURE.md](./ARCHITECTURE.md)
+### **4. Login**
+- **Owner Account:**
+  - Email: `william@boss.com`
+  - Password: `william2024`
+  - Can edit/delete all data
+
+- **Staff Account:**
+  - Email: `staff@gitara.com`
+  - Password: `staff2024`
+  - Read-only access
 
 ---
 
-## 📋 What's Included
+## 📱 **CURRENCY & FORMATTING**
 
-### ✅ Frontend
-- Modern React 18 with TypeScript
-- Tailwind CSS v4 for styling
-- Recharts for data visualization
-- Lucide React for icons
-- Sonner for toast notifications
-- Fully responsive layout
-
-### ✅ Backend
-- Supabase Edge Functions (Deno runtime)
-- Hono web framework
-- RESTful API design
-- CORS enabled
-- Comprehensive error handling
-
-### ✅ Database
-- PostgreSQL with JSONB storage
-- Key-value architecture
-- Prefix-based organization
-- Automatic timestamps
+- **Currency:** UGX (Uganda Shillings)
+- **Format:** UGX 1,500,000
+- **Phone Numbers:** Normalized to 0XXX format (removes +256)
+- **Interest Rate:** 20% monthly over 30 days
 
 ---
 
-## 📊 Database Structure
+## 🔧 **KEY FUNCTIONALITIES**
 
-### Proper PostgreSQL Tables
+### **Adding a Client**
+1. Click "Add Client" button
+2. Fill in client details (name, phone, loan amount, interest rate, duration)
+3. System auto-calculates total due
+4. Creates Processing Fee and Loan Disbursement entries in Cashbook
 
-#### 1. **clients** Table
-Stores all client/borrower information with loan details.
+### **Recording Payment**
+1. Select client from Clients page
+2. Click "Record Payment"
+3. Enter payment amount and date
+4. System updates client balance
+5. Creates cashbook entry automatically
+6. Optional: Print payment receipt
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | TEXT (PK) | Unique client identifier |
-| `full_name` | TEXT | Client's full name |
-| `phone_number` | TEXT | Ugandan phone number |
-| `address` | TEXT | Physical address |
-| `loan_amount` | DECIMAL | Original loan amount |
-| `outstanding_balance` | DECIMAL | Remaining balance |
-| `total_paid` | DECIMAL | Total amount paid so far |
-| `status` | TEXT | Active / Completed / Defaulted |
-| `start_date` | DATE | Loan start date |
-| `daily_payment` | DECIMAL | Required daily payment |
-| `total_payable` | DECIMAL | Loan + 20% interest |
-| `guarantor_name` | TEXT | Guarantor information (optional) |
-| `created_at` | TIMESTAMP | Auto-generated |
-| `updated_at` | TIMESTAMP | Auto-updated |
+### **Managing Owner Capital**
+1. Go to Cashbook page
+2. Click "Owner Capital" button
+3. Choose "Add Money" or "Remove Money"
+4. System tracks capital separately from client loans
 
-#### 2. **transactions** Table
-Records all payment transactions.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | TEXT (PK) | Unique transaction ID |
-| `client_id` | TEXT (FK) | References clients(id) |
-| `client_name` | TEXT | Client name for quick access |
-| `date` | DATE | Payment date |
-| `time` | TEXT | Payment time |
-| `amount` | DECIMAL | Payment amount |
-| `notes` | TEXT | Optional payment notes |
-| `status` | TEXT | Paid / Unpaid |
-| `created_at` | TIMESTAMP | Auto-generated |
-
-#### 3. **cashbook** Table
-Tracks all income and expenses.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | TEXT (PK) | Unique entry ID |
-| `date` | DATE | Transaction date |
-| `time` | TEXT | Transaction time |
-| `description` | TEXT | Entry description |
-| `type` | TEXT | Income / Expense |
-| `amount` | DECIMAL | Amount |
-| `status` | TEXT | Paid / Expense / Profit / Disbursement |
-| `created_at` | TIMESTAMP | Auto-generated |
-| `updated_at` | TIMESTAMP | Auto-updated |
-
-#### 4. **owner_capital** Table
-Records owner William Kalamuzi's transactions.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | TEXT (PK) | Unique transaction ID |
-| `date` | DATE | Transaction date |
-| `time` | TEXT | Transaction time |
-| `type` | TEXT | Capital Injection / Owner Withdrawal |
-| `amount` | DECIMAL | Amount |
-| `description` | TEXT | Transaction description |
-| `created_at` | TIMESTAMP | Auto-generated |
-
-### Database Features
-
-- ✅ **Foreign Keys**: `transactions.client_id` references `clients.id`
-- ✅ **Cascade Delete**: Deleting client removes their transactions
-- ✅ **Indexes**: Optimized for fast queries on date, status, client_id
-- ✅ **CHECK Constraints**: Validates status values
-- ✅ **Auto Timestamps**: `created_at` and `updated_at` managed automatically
+### **Cascading Deletes**
+- Deleting a client removes all their transactions
+- Deleting a payment reverses the client balance
+- Deleting owner capital removes associated cashbook entry
 
 ---
 
-## 🔌 API Endpoints
+## 🎯 **PERMISSIONS**
 
-All endpoints are prefixed with `/make-server-68baa523`:
-
-### Clients
-- `GET /clients` - Fetch all clients
-- `GET /clients/:id` - Fetch single client
-- `POST /clients` - Create new client
-- `PUT /clients/:id` - Update client
-- `DELETE /clients/:id` - Delete client
-
-### Transactions
-- `GET /transactions` - Fetch all transactions
-- `GET /transactions/client/:clientId` - Fetch client transactions
-- `POST /transactions` - Create new transaction
-
-### Cashbook
-- `GET /cashbook` - Fetch all cashbook entries
-- `POST /cashbook` - Create cashbook entry
-- `PUT /cashbook/:id` - Update cashbook entry
-- `DELETE /cashbook/:id` - Delete cashbook entry
-
-### Owner Capital
-- `GET /owner-capital` - Fetch all owner capital transactions
-- `POST /owner-capital` - Create owner capital transaction
-
----
-
-## 🧪 Testing
-
-### Method 1: Visual Test Page
-
-Open `test-connection.html` in your browser to automatically test all API endpoints.
-
-### Method 2: cURL
-
-```bash
-# Test health endpoint
-curl https://tmelmmhephgyzccezfgd.supabase.co/functions/v1/make-server-68baa523/health
-
-# Test get clients
-curl -H "Authorization: Bearer YOUR_ANON_KEY" \
-  https://tmelmmhephgyzccezfgd.supabase.co/functions/v1/make-server-68baa523/clients
-```
-
-### Method 3: Use the Application
-
-1. Login to William Loans
-2. Add a test client
-3. Record a payment
-4. Check Supabase dashboard to verify data
-
----
-
-## 📖 Documentation
-
-| Document | Description |
-|----------|-------------|
-| [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) | Complete deployment instructions |
-| [INTEGRATION_CHECKLIST.md](./INTEGRATION_CHECKLIST.md) | Integration verification checklist |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | System architecture details |
-| [README.md](./README.md) | This file |
-
----
-
-## 💡 Key Functionality
-
-### Adding a Client
-
-1. Navigate to **Clients** page
-2. Click **Add Client** button
-3. Fill in client details:
-   - Full Name
-   - Phone Number (Ugandan format)
-   - Address
-   - Loan Amount (in UGX)
-   - Start Date
-4. System automatically:
-   - Calculates 20% monthly interest
-   - Divides repayment into 30 daily payments
-   - Records processing fee (10,000 UGX)
-   - Creates loan disbursement record
-
-### Recording a Payment
-
-1. Click on a client to view details
-2. Click **Record Payment** button
-3. Enter payment amount
-4. Add optional notes
-5. System automatically:
-   - Updates client's total paid amount
-   - Adjusts outstanding balance
-   - Creates transaction record
-   - Adds cashbook income entry
-   - Updates loan status if fully paid
-
-### Owner Capital Management
-
-**William Kalamuzi only:**
-
-1. Click **Owner Capital** button in sidebar
-2. Choose transaction type:
-   - **Capital Injection** - Adding money to business
-   - **Owner Withdrawal** - Taking money out
-3. Enter amount and description
-4. System records in both cashbook and owner capital history
-
----
-
-## 🎨 Design Features
-
-- **Clean, professional fintech UI**
-- **White backgrounds with subtle shadows**
-- **Rounded cards for modern look**
-- **UGX currency formatting** (e.g., UGX 1,500,000)
-- **Ugandan phone number formatting** (0700123456)
-- **Color-coded status indicators**
-- **Interactive charts and graphs**
-- **Mobile-first responsive design**
-
----
-
-## 🔐 Security
-
-- ✅ Service role key secured in backend only
-- ✅ Anon key safe for frontend use
-- ✅ `.env` file excluded from git
-- ✅ CORS properly configured
-- ✅ HTTPS enforced
-- ✅ Role-based access control
-
----
-
-## 🛠️ Technology Stack
-
-- **Frontend:** React 18, TypeScript, Vite
-- **Styling:** Tailwind CSS v4
-- **Charts:** Recharts
-- **Backend:** Supabase Edge Functions (Deno + Hono)
-- **Database:** PostgreSQL
-- **Hosting:** Supabase
-
----
-
-## 📊 Business Logic
-
-### Loan Calculation
-- **Interest Rate:** 20% monthly (fixed)
-- **Repayment Period:** 30 days
-- **Payment Frequency:** Daily
-- **Processing Fee:** 10,000 UGX (one-time)
-
-**Example:**
-```
-Loan Amount: UGX 500,000
-Interest (20%): UGX 100,000
-Total Repayment: UGX 600,000
-Daily Payment: UGX 20,000 (600,000 ÷ 30 days)
-```
-
-### Cashbook Categories
-- **Income:** Loan repayments, processing fees, capital injections
-- **Expense:** Loan disbursements, operating expenses, owner withdrawals
-- **Status:** Paid, Profit, Expense, Disbursement
-
----
-
-## 🎯 User Roles
-
-### Boss (william@boss.com)
-- ✅ Full system access
-- ✅ Add/edit/delete clients
+### **Owner (william@boss.com)**
+- ✅ Add clients
+- ✅ Edit clients
+- ✅ Delete clients
 - ✅ Record payments
+- ✅ Edit payments
+- ✅ Delete payments
 - ✅ Manage cashbook
-- ✅ Access owner capital
-- ✅ Edit data from other users
-- ✅ View all reports
+- ✅ Manage owner capital
 
-### Cashier (cashier.com)
-- ✅ View all clients
-- ✅ Record payments
-- ✅ View cashbook
+### **Staff (other users)**
+- ✅ View all data
 - ✅ View reports
-- ❌ Cannot edit other users' data
-- ❌ Cannot access owner capital
-
-### Field Officer (field.com)
-- ✅ View clients
-- ✅ Record payments
-- ✅ View transaction history
-- ❌ Cannot edit clients
-- ❌ Cannot access cashbook
-- ❌ Cannot access owner capital
+- ✅ View dashboard
+- ❌ Cannot edit/delete anything
 
 ---
 
-## 📱 Responsive Breakpoints
+## 📂 **PROJECT STRUCTURE**
 
-- **Mobile:** < 768px
-- **Tablet:** 768px - 1024px
-- **Desktop:** > 1024px
-
-All features work seamlessly across all devices.
-
----
-
-## 🔄 Data Persistence
-
-**Everything is saved to the database:**
-
-- ✅ Client information
-- ✅ Payment transactions
-- ✅ Cashbook entries
-- ✅ Owner capital transactions
-- ✅ All data survives page refresh
-- ✅ Real-time updates across sessions
+```
+gitara-branch/
+├── src/
+│   ├── app/
+│   │   ├── components/        # UI components
+│   │   ├── pages/             # Page components
+│   │   ├── data/              # Data models
+│   │   ├── hooks/             # Custom hooks
+│   │   └── App.tsx            # Main app component
+│   ├── services/
+│   │   └── localApi.ts        # LocalStorage API
+│   └── styles/                # CSS files
+├── package.json
+└── README.md
+```
 
 ---
 
-## 🚧 Future Enhancements
+## 🛠️ **TECH STACK**
 
-Potential additions:
-
-- 📧 Email notifications for due payments
-- 📱 SMS integration for payment reminders
-- 📊 Advanced reporting and analytics
-- 🔔 Push notifications
-- 📅 Payment calendar view
-- 🏦 Multi-currency support
-- 📈 Predictive analytics
-
----
-
-## 📞 Support
-
-For issues or questions:
-
-1. Check the [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
-2. Review the [INTEGRATION_CHECKLIST.md](./INTEGRATION_CHECKLIST.md)
-3. Inspect browser console for errors (F12)
-4. Check Supabase function logs
+- **Framework:** React 18 + TypeScript
+- **Styling:** Tailwind CSS v4
+- **UI Components:** shadcn/ui
+- **Icons:** Lucide React
+- **Notifications:** Sonner (toast)
+- **PDF Generation:** jsPDF
+- **Build Tool:** Vite
+- **Storage:** Browser LocalStorage
 
 ---
 
-## 📄 License
+## 🔄 **DATA PERSISTENCE**
 
-Proprietary - Internal use only for William Loans, Uganda
+All data is stored in browser localStorage:
+- ✅ Clients: `gitara_branch_clients`
+- ✅ Transactions: `gitara_branch_transactions`
+- ✅ Cashbook: `gitara_branch_cashbook`
+- ✅ Owner Capital: `gitara_branch_owner_capital`
 
----
-
-## 🎉 Status
-
-**✅ Production Ready**
-
-Your William Loans system is fully integrated, tested, and ready for deployment!
-
-- ✅ Frontend connected to backend
-- ✅ Backend connected to database
-- ✅ All CRUD operations working
-- ✅ Data persistence verified
-- ✅ Authentication implemented
-- ✅ Role-based access configured
-- ✅ Responsive design complete
-
-**Just deploy and start managing loans!** 🚀
+**Note:** Data is tied to the browser. Clearing browser data will delete all records.
 
 ---
 
-Built with ❤️ for William Kalamuzi and team
+## 📝 **DEVELOPMENT NOTES**
+
+### **Adding New Features**
+1. Update data models in `/src/app/data/mockData.ts`
+2. Create UI components in `/src/app/components/`
+3. Update pages in `/src/app/pages/`
+4. Use `useLocalData` hook for data management
+
+### **Styling Guidelines**
+- Use Tailwind utility classes
+- Follow emerald green theme (#047857, #10b981)
+- Keep UI clean and minimal
+- Ensure mobile responsiveness
+
+---
+
+## ⚠️ **IMPORTANT NOTES**
+
+1. **Data is LOCAL** - Not synced across devices
+2. **Owner Only** - Only william@boss.com can edit/delete
+3. **Phone Format** - Always stored as 0XXX (removes +256)
+4. **Interest Calc** - 20% monthly over 30 days
+5. **No SMS** - SMS features disabled (requires backend)
+
+---
+
+## 🎓 **LEARNING RESOURCES**
+
+- [React Documentation](https://react.dev)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Tailwind CSS](https://tailwindcss.com)
+- [shadcn/ui](https://ui.shadcn.com)
+
+---
+
+## 📄 **LICENSE**
+
+Private project for GITARA BRANCH internal use.
+
+---
+
+## 💡 **FUTURE ENHANCEMENTS**
+
+Potential features to add:
+- [ ] Backend integration with Supabase
+- [ ] SMS notifications via Africa's Talking
+- [ ] Multi-device sync
+- [ ] Export data to Excel
+- [ ] Automated payment reminders
+- [ ] Client credit scoring
+- [ ] Loan approval workflow
+
+---
+
+## 📞 **SUPPORT**
+
+For technical issues or feature requests, contact the development team.
+
+---
+
+**Built with ❤️ for GITARA BRANCH** 🏦

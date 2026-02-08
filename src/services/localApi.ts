@@ -233,7 +233,7 @@ export const smsApi = {
     
     return {
       success: false,
-      message: 'SMS not sent - Backend not configured. Please set up Supabase and Africa\'s Talking.',
+      message: 'SMS not sent - Backend not configured. SMS feature requires backend setup.',
       smsRecord,
     };
   },

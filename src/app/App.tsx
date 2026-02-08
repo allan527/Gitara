@@ -19,10 +19,10 @@ import { UserPerformance } from './pages/UserPerformance';
 import { Login } from './pages/Login';
 import { MobileHeader } from './components/MobileHeader';
 import { Sidebar } from './components/Sidebar';
-import { BackendSetupBanner } from './components/BackendSetupBanner';
 import { Toaster, toast } from 'sonner';
 import { Client, Transaction, CashbookEntry, formatUGX, normalizePhoneNumber } from './data/mockData';
-import { useBackendData } from './hooks/useBackendData';
+import { useLocalData } from './hooks/useLocalData';
+import { clientsApi, transactionsApi, cashbookApi, ownerCapitalApi, smsApi } from '@/services/localApi';
 
 export default function App() {
   const sidebarRef = useRef<any>(null);
@@ -30,7 +30,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [activePage, setActivePage] = useState('dashboard');
   
-  // Use the backend data hook for all data management
+  // Use local data storage (no backend)
   const {
     clients,
     transactions,
@@ -55,7 +55,7 @@ export default function App() {
     deleteOwnerCapitalTransaction: backendDeleteOwnerCapitalTransaction,
     setOwnerCapitalTransactions,
     reloadData,
-  } = useBackendData();
+  } = useLocalData();
   
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [showAddClientModal, setShowAddClientModal] = useState(false);
@@ -108,7 +108,7 @@ export default function App() {
     }
   }, [isLoggedIn]);
 
-  // Data is now automatically loaded by useBackendData hook
+  // Data is now automatically loaded by useLocalData hook
   // No need for manual initialization
 
   // 🔧 DATA REPAIR FUNCTION - Recreate missing cashbook entries from transactions
@@ -209,8 +209,8 @@ export default function App() {
     }
   };
 
-  // Data loading is now handled by useBackendData hook
-  // All CRUD operations use the backend hook functions
+  // Data loading is now handled by useLocalData hook
+  // All CRUD operations use localStorage
 
   const handleLogin = (email: string) => {
     setIsLoggedIn(true);
@@ -733,7 +733,7 @@ Call: +256709907775`;
         enteredBy: currentUser || 'Unknown', // Track who entered the expense
       };
 
-      // Save to Supabase
+      // Save to localStorage
       await cashbookApi.create(newCashbookEntry);
       setCashbookEntries(prev => [newCashbookEntry, ...prev]);
 
@@ -831,7 +831,7 @@ Call: +256709907775`;
         date: updatedData.date,
       };
 
-      // Save to Supabase
+      // Save to localStorage
       await clientsApi.update(client.id, updatedClient);
       await transactionsApi.update(transactionId, updatedTransaction);
 
@@ -1237,7 +1237,7 @@ Call: +256709907775`;
         assignedTo: userEmail || undefined, // empty string means unassign
       };
 
-      // Save to Supabase
+      // Save to localStorage
       await clientsApi.update(clientId, updatedClient);
 
       // Update local state
@@ -1441,9 +1441,6 @@ Call: +256709907775`;
 
       {/* Main Content Area */}
       <div className="lg:ml-64 p-4 sm:p-6 lg:p-8 pt-28 sm:pt-28 lg:pt-12 pb-8">
-        {/* Backend Setup Banner */}
-        <BackendSetupBanner />
-        
         {/* Render active page */}
         {activePage === 'dashboard' && (
           <Dashboard 
