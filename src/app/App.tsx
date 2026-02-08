@@ -17,20 +17,22 @@ import { DataView } from './pages/DataView';
 import { MissedPayments } from './pages/MissedPayments';
 import { UserPerformance } from './pages/UserPerformance';
 import { Login } from './pages/Login';
+import { DataMigration } from './pages/DataMigration';
 import { MobileHeader } from './components/MobileHeader';
 import { Sidebar } from './components/Sidebar';
 import { Toaster, toast } from 'sonner';
 import { Client, Transaction, CashbookEntry, formatUGX, normalizePhoneNumber } from './data/mockData';
-import { useLocalData } from './hooks/useLocalData';
+import { useSupabaseData } from './hooks/useSupabaseData';
 import { clientsApi, transactionsApi, cashbookApi, ownerCapitalApi, smsApi } from '@/services/localApi';
 
 export default function App() {
   const sidebarRef = useRef<any>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [showMigration, setShowMigration] = useState(false);
   const [activePage, setActivePage] = useState('dashboard');
   
-  // Use local data storage (no backend)
+  // Use Supabase backend data storage
   const {
     clients,
     transactions,
@@ -55,7 +57,8 @@ export default function App() {
     deleteOwnerCapitalTransaction: backendDeleteOwnerCapitalTransaction,
     setOwnerCapitalTransactions,
     reloadData,
-  } = useLocalData();
+    syncLocalDataToBackend,
+  } = useSupabaseData();
   
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [showAddClientModal, setShowAddClientModal] = useState(false);
@@ -216,6 +219,18 @@ export default function App() {
     setIsLoggedIn(true);
     setCurrentUser(email);
     localStorage.setItem('gitara_branch_user', email);
+    
+    // Check if there's local data to migrate on first login
+    const hasLocalData = localStorage.getItem('gitara_branch_clients') || 
+                         localStorage.getItem('gitara_branch_transactions') ||
+                         localStorage.getItem('gitara_branch_cashbook') ||
+                         localStorage.getItem('gitara_branch_owner_capital');
+    
+    if (hasLocalData && backendConfigured) {
+      // Show migration page if there's local data and backend is ready
+      setShowMigration(true);
+    }
+    
     toast.success(`Welcome to GITARA BRANCH, ${email}!`);
   };
 
@@ -1403,6 +1418,19 @@ Call: +256709907775`;
     return <Login onLogin={handleLogin} />;
   }
 
+  // Show migration page if needed (only on first login with Supabase)
+  if (showMigration && syncLocalDataToBackend) {
+    return (
+      <DataMigration 
+        onMigrate={async (data) => {
+          await syncLocalDataToBackend(data);
+          setShowMigration(false);
+        }}
+        backendConnected={backendConfigured}
+      />
+    );
+  }
+
   // Show loading state while data is loading
   if (dataLoading) {
     return (
@@ -1423,6 +1451,28 @@ Call: +256709907775`;
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Backend Status Indicator - Fixed at bottom right */}
+      <div className="fixed bottom-4 right-4 z-50 hidden sm:block">
+        <div className={`px-3 py-2 rounded-lg shadow-lg border ${
+          backendConfigured 
+            ? 'bg-emerald-50 border-emerald-200' 
+            : 'bg-gray-50 border-gray-200'
+        }`}>
+          <div className="flex items-center gap-2">
+            {backendConfigured ? (
+              <>
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-medium text-emerald-700">Backend Connected</span>
+              </>
+            ) : (
+              <>
+                <div className="w-2 h-2 rounded-full bg-gray-400" />
+                <span className="text-xs font-medium text-gray-600">Local Storage</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Mobile Header */}
       <MobileHeader 
@@ -1516,7 +1566,9 @@ Call: +256709907775`;
             }}
             onDeleteCashbook={handleDeleteCashbook}
             onDeleteOwnerCapital={handleDeleteOwnerCapital}
-            onRepairCashbook={repairMissingCashbookEntries} // 🔧 Add repair function
+            onRepairCashbook={repairMissingCashbookEntries}
+            backendConfigured={backendConfigured}
+            onShowMigration={() => setShowMigration(true)}
           />
         )}
         

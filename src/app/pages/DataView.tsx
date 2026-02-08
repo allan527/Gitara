@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
 import { DataTable, Column, DataTableAction } from '@/app/components/DataTable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card';
-import { Eye, Edit, Trash2, Database, PlusCircle, DollarSign } from 'lucide-react';
+import { Eye, Edit, Trash2, Database, PlusCircle, DollarSign, CheckCircle, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/app/components/ui/button';
 import { Footer } from '@/app/components/Footer';
@@ -77,7 +77,9 @@ interface DataViewProps {
   onEditTransaction?: (transaction: Transaction) => void;
   onDeleteCashbook?: (cashbookId: string) => void;
   onDeleteOwnerCapital?: (ownerCapitalId: string) => void;
-  onRepairCashbook?: () => void; // 🔧 New prop for data repair
+  onRepairCashbook?: () => void;
+  backendConfigured?: boolean;
+  onShowMigration?: () => void;
 }
 
 export function DataView({ 
@@ -94,7 +96,9 @@ export function DataView({
   onEditTransaction,
   onDeleteCashbook,
   onDeleteOwnerCapital,
-  onRepairCashbook // 🔧 New prop for data repair
+  onRepairCashbook,
+  backendConfigured = false,
+  onShowMigration
 }: DataViewProps) {
   // Client columns
   const clientColumns: Column<Client>[] = [
@@ -443,6 +447,47 @@ export function DataView({
           </div>
         </div>
       </div>
+
+      {/* Backend Status Card */}
+      <Card className="bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-emerald-900">
+            {backendConfigured ? (
+              <>
+                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                Backend Connected
+              </>
+            ) : (
+              <>
+                <Database className="h-5 w-5 text-amber-600" />
+                Backend Status
+              </>
+            )}
+          </CardTitle>
+          <CardDescription>
+            {backendConfigured ? (
+              <span className="text-emerald-700">
+                Your data is synced with Supabase backend database
+              </span>
+            ) : (
+              <span className="text-amber-700">
+                Using local storage only
+              </span>
+            )}
+          </CardDescription>
+        </CardHeader>
+        {onShowMigration && (
+          <CardContent>
+            <Button 
+              onClick={onShowMigration}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Migrate Local Data to Backend
+            </Button>
+          </CardContent>
+        )}
+      </Card>
 
       {/* Tabs for different data tables */}
       <Tabs defaultValue="clients" className="w-full">
