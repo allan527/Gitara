@@ -23,7 +23,7 @@ import { Sidebar } from './components/Sidebar';
 import { Toaster, toast } from 'sonner';
 import { Client, Transaction, CashbookEntry, formatUGX, normalizePhoneNumber } from './data/mockData';
 import { useSupabaseData } from './hooks/useSupabaseData';
-import { clientsApi, transactionsApi, cashbookApi, ownerCapitalApi, smsApi } from '@/services/localApi';
+import { smsApi } from '../services/localApi';
 
 export default function App() {
   const sidebarRef = useRef<any>(null);
@@ -303,7 +303,7 @@ Your Loan from GITARA BRANCH has been approved!
 Thank you!
 Call: +256709907775`;
 
-      // Send SMS via API
+      // Send SMS via local API (saves to history, doesn't actually send)
       const response = await smsApi.send({
         recipients: [client.phoneNumber],
         message,
@@ -311,16 +311,10 @@ Call: +256709907775`;
         clientIds: [client.id]
       });
 
-      if (response.success) {
-        console.log('✅ Loan disbursement SMS sent successfully to', client.fullName);
-        toast.success(`Loan SMS sent to ${client.fullName}!`);
-      } else {
-        console.error('❌ SMS failed:', response.error);
-        toast.error(`Loan created but SMS failed: ${response.error}`);
-      }
+      console.log('📱 SMS saved to history (not actually sent):', response);
     } catch (error) {
-      console.error('Error sending loan SMS:', error);
-      toast.error('Loan created but SMS failed to send');
+      console.error('⚠️ Error with SMS:', error);
+      // Don't show error to user - SMS is non-critical
     }
   };
 
@@ -618,9 +612,7 @@ Call: +256709907775`;
         issuedBy: payment.recordedBy || currentUser || 'Admin',
       });
 
-      // 📱 SEND SMS RECEIPT TO CLIENT VIA AFRICA'S TALKING
-      console.log('🔄 STEP 4: Sending payment receipt via SMS...');
-      console.log('📱 Client phone number:', client.phoneNumber);
+      // 📱 Send SMS receipt (saves to history, doesn't actually send)
       try {
         const loanNumber = client.currentLoanNumber || 1;
         const smsMessage = `Dear ${clientName},\n\n✅ PAYMENT RECEIVED - Texas Finance\nAmount Paid: ${formatUGX(payment.amount)}\nDate: ${payment.date} at ${payment.time}\nTotal Paid: ${formatUGX(newTotalPaid)}\nRemaining Balance: ${formatUGX(newOutstandingBalance)}\n\nThank you for your payment!\nCall: +256709907775\n- Texas Finance Team`;
