@@ -231,8 +231,39 @@ app.get('/make-server-7f28f6fd/owner-capital', async (c) => {
 app.post('/make-server-7f28f6fd/owner-capital', async (c) => {
   try {
     const transaction = await c.req.json();
+    
+    console.log('📝 Adding owner capital transaction:', transaction);
+    console.log('   Type:', transaction.type);
+    console.log('   Amount:', transaction.amount);
+    
+    // Save the owner capital transaction
     await kv.set(`owner-capital:${transaction.id}`, transaction);
-    return c.json({ transaction });
+    
+    // Create corresponding cashbook entry
+    // Capital Injection = Income
+    // Owner Withdrawal = Expense
+    const cashbookEntry = {
+      id: `c${Date.now()}`,
+      date: transaction.date,
+      time: transaction.time,
+      description: transaction.description || transaction.type,
+      type: transaction.type === 'Capital Injection' ? 'Income' : 'Expense',
+      amount: transaction.amount,
+      status: transaction.type === 'Capital Injection' ? 'Capital' : 'Withdrawal',
+      enteredBy: transaction.enteredBy || 'System',
+    };
+    
+    console.log('📝 Creating cashbook entry:', cashbookEntry);
+    
+    // Save cashbook entry
+    await kv.set(`cashbook:${cashbookEntry.id}`, cashbookEntry);
+    
+    console.log('✅ Owner capital transaction and cashbook entry created successfully');
+    
+    return c.json({ 
+      transaction,
+      cashbookEntry 
+    });
   } catch (error) {
     console.log('Error adding owner capital transaction:', error);
     return c.json({ error: 'Failed to add owner capital transaction', details: String(error) }, 500);

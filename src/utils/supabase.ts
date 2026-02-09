@@ -4,7 +4,22 @@ import { projectId, publicAnonKey } from '/utils/supabase/info';
 const supabaseUrl = `https://${projectId}.supabase.co`;
 const supabaseKey = publicAnonKey;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Singleton pattern to prevent multiple client instances
+let supabaseInstance: ReturnType<typeof createClient> | null = null;
+
+const getSupabaseClient = () => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: true,
+        storageKey: 'gitala-branch-auth-token', // Custom storage key to avoid conflicts
+      }
+    });
+  }
+  return supabaseInstance;
+};
+
+export const supabase = getSupabaseClient();
 
 export const getAuthHeaders = () => {
   return {
