@@ -18,6 +18,7 @@ import { TransactionHistory } from './pages/TransactionHistory';
 import { DataView } from './pages/DataView';
 import { MissedPayments } from './pages/MissedPayments';
 import { UserPerformance } from './pages/UserPerformance';
+import { Evaluation } from './pages/Evaluation';
 import { Login } from './pages/Login';
 import { DataMigration } from './pages/DataMigration';
 import { MobileHeader } from './components/MobileHeader';
@@ -250,6 +251,12 @@ export default function App() {
     // STRICT: Block Data View access for non-owners
     if (page === 'data-view' && currentUser !== 'william@boss.com') {
       toast.error('Access Denied: Only the owner can access Data View');
+      return;
+    }
+    
+    // STRICT: Block Evaluation access for non-owners
+    if (page === 'evaluation' && currentUser !== 'william@boss.com') {
+      toast.error('Access Denied: Only the owner can access Evaluation');
       return;
     }
     
@@ -1289,8 +1296,12 @@ Call: +256709907775`;
         return 'Missed Payments';
       case 'user-performance':
         return 'User Performance';
+      case 'client-allocation':
+        return 'Client Allocation';
+      case 'evaluation':
+        return 'Evaluation';
       default:
-        return 'Texas Finance';
+        return 'GITALA BRANCH';
     }
   };
 
@@ -1588,6 +1599,15 @@ Call: +256709907775`;
           <UserPerformance 
             clients={clients}
             transactions={transactions}
+            currentUser={currentUser}
+          />
+        )}
+        
+        {activePage === 'evaluation' && (
+          <Evaluation 
+            transactions={transactions}
+            cashbookEntries={cashbookEntries}
+            clients={clients}
             currentUser={currentUser}
           />
         )}

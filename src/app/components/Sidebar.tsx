@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, UserPlus, Book, FileText, X, Menu, LogOut, User, Database, AlertCircle, Award, UserCog } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, Book, FileText, X, Menu, LogOut, User, Database, AlertCircle, Award, UserCog, PieChart } from 'lucide-react';
 import { useState, useImperativeHandle, forwardRef } from 'react';
 
 interface SidebarProps {
@@ -30,6 +30,7 @@ export const Sidebar = forwardRef<SidebarRef, SidebarProps>(({ activePage, onNav
     ...(isOwner ? [{ id: 'client-allocation', label: 'Client Allocation', icon: UserCog }] : []),
     { id: 'cashbook', label: 'Cashbook', icon: Book },
     { id: 'history', label: 'Reports / History', icon: FileText },
+    ...(isOwner ? [{ id: 'evaluation', label: 'Evaluation', icon: PieChart }] : []),
     { id: 'data-view', label: 'Data View', icon: Database },
   ];
 
