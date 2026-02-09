@@ -28,7 +28,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
           <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
             <Lock className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">GITARA BRANCH</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">GITALA BRANCH</h1>
           <p className="text-gray-600">Loan Management System</p>
           <div className="mt-4 pt-4 border-t border-gray-200">
             <p className="text-sm font-semibold text-gray-900 mb-1">Admin Access Only</p>

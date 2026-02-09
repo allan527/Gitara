@@ -1,8 +1,8 @@
-# 🔐 LOGIN CREDENTIALS - GITARA BRANCH
+# 🔐 LOGIN CREDENTIALS - GITALA BRANCH
 
 ## 📋 All User Accounts
 
-Your GITARA BRANCH system has **5 user accounts** configured:
+Your GITALA BRANCH system has **5 user accounts** configured:
 
 ---
 
@@ -44,9 +44,9 @@ Your GITARA BRANCH system has **5 user accounts** configured:
 
 ---
 
-### **Field Officer 1**
-- **Email:** `field1.com`
-- **Password:** `Field1@26`
+### **Gasasira - Field Officer**
+- **Email:** `gasasira.com`
+- **Password:** `Gasasira2021`
 - **Role:** Field Officer
 - **Permissions:**
   - ✅ View dashboard
@@ -98,7 +98,7 @@ Your GITARA BRANCH system has **5 user accounts** configured:
 |------|-------|----------|------|-----------|-------------|
 | **William** | william@boss.com | William2026 | Boss | ✅ YES | ✅ YES |
 | Cashier | cashier.com | Cash2026# | Cashier | ❌ NO | ❌ NO |
-| Field Officer 1 | field1.com | Field1@26 | Field Officer | ❌ NO | ❌ NO |
+| **Gasasira** | gasasira.com | Gasasira2021 | Field Officer | ❌ NO | ❌ NO |
 | Field Officer 2 | field2.com | Field2@26 | Field Officer | ❌ NO | ❌ NO |
 | Field Officer 3 | field3.com | Field3@26 | Field Officer | ❌ NO | ❌ NO |
 
@@ -139,7 +139,7 @@ Your GITARA BRANCH system has **5 user accounts** configured:
 ## 🚀 How to Login
 
 ### Step 1: Open the App
-- Go to your GITARA BRANCH application URL
+- Go to your GITALA BRANCH application URL
 
 ### Step 2: Enter Credentials
 - **Email Field:** Enter one of the emails above
@@ -292,10 +292,10 @@ cashier.com
 Cash2026#
 ```
 
-### Field Officer 1
+### Gasasira (Field Officer)
 ```
-field1.com
-Field1@26
+gasasira.com
+Gasasira2021
 ```
 
 ### Field Officer 2
@@ -360,7 +360,7 @@ Field3@26
 
 **Staff Accounts (View + Record Only):**
 - cashier.com / Cash2026#
-- field1.com / Field1@26
+- gasasira.com / Gasasira2021
 - field2.com / Field2@26
 - field3.com / Field3@26
 
@@ -370,4 +370,4 @@ Field3@26
 
 **Need Help?** All credentials are working and ready to use! Just copy and paste from above. 🔐
 
-_© 2026 GITARA BRANCH - Uganda_
+_© 2026 GITALA BRANCH - Uganda_

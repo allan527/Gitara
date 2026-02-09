@@ -8,6 +8,8 @@ import { PaymentReceiptModal } from './components/PaymentReceiptModal';
 import { EditPaymentModal } from './components/EditPaymentModal';
 import { NewLoanModal } from './components/NewLoanModal';
 import { ClientAllocationModal } from './components/ClientAllocationModal';
+import { ReminderModal } from './components/ReminderModal';
+import { SMSBalanceModal } from './components/SMSBalanceModal';
 import { Dashboard } from './pages/Dashboard';
 import { Clients } from './pages/Clients';
 import { ClientDetail } from './pages/ClientDetail';
@@ -23,7 +25,7 @@ import { Sidebar } from './components/Sidebar';
 import { Toaster, toast } from 'sonner';
 import { Client, Transaction, CashbookEntry, formatUGX, normalizePhoneNumber } from './data/mockData';
 import { useSupabaseData } from './hooks/useSupabaseData';
-import { smsApi } from '../services/localApi';
+import { clientsApi, transactionsApi, cashbookApi, ownerCapitalApi, smsApi } from '../services/localApi';
 
 export default function App() {
   const sidebarRef = useRef<any>(null);
@@ -70,6 +72,8 @@ export default function App() {
   const [showEditPaymentModal, setShowEditPaymentModal] = useState(false);
   const [showNewLoanModal, setShowNewLoanModal] = useState(false);
   const [showClientAllocationModal, setShowClientAllocationModal] = useState(false);
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [showSMSBalanceModal, setShowSMSBalanceModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [selectedClientForNewLoan, setSelectedClientForNewLoan] = useState<Client | null>(null);
   const [receiptData, setReceiptData] = useState<{
@@ -204,7 +208,7 @@ export default function App() {
       });
       
       // Reload all data to ensure consistency
-      await loadAllData();
+      await reloadData();
       
     } catch (error) {
       console.error('❌ Data repair failed:', error);
@@ -231,7 +235,7 @@ export default function App() {
       setShowMigration(true);
     }
     
-    toast.success(`Welcome to GITARA BRANCH, ${email}!`);
+    toast.success(`Welcome to GITALA BRANCH, ${email}!`);
   };
 
   const handleLogout = () => {
@@ -293,7 +297,7 @@ export default function App() {
 
       const message = `Dear ${client.fullName},
 
-Your Loan from GITARA BRANCH has been approved!
+Your Loan from GITALA BRANCH has been approved!
 
 💰 Amount: ${formatUGX(client.loanAmount)}
 📈 Total to Pay: ${formatUGX(client.totalPayable)}
@@ -303,7 +307,7 @@ Your Loan from GITARA BRANCH has been approved!
 Thank you!
 Call: +256709907775`;
 
-      // Send SMS via local API (saves to history, doesn't actually send)
+      // Send SMS via Africa's Talking
       const response = await smsApi.send({
         recipients: [client.phoneNumber],
         message,
@@ -311,9 +315,9 @@ Call: +256709907775`;
         clientIds: [client.id]
       });
 
-      console.log('📱 SMS saved to history (not actually sent):', response);
+      console.log('📱 SMS sent successfully:', response);
     } catch (error) {
-      console.error('⚠️ Error with SMS:', error);
+      console.error('⚠️ Error sending SMS:', error);
       // Don't show error to user - SMS is non-critical
     }
   };
@@ -414,16 +418,22 @@ Call: +256709907775`;
   };
 
   const handleUpdateClient = async (updatedClient: Client) => {
-    // STRICT: Only owner can edit/modify
-    if (currentUser !== 'william@boss.com') {
-      toast.error('Access Denied: Only the owner can edit client data');
-      return;
-    }
-    
     try {
-      // Get the original client to check for name changes
+      // Get the original client to check for changes
       const originalClient = clients.find(c => c.id === updatedClient.id);
       if (!originalClient) return;
+
+      // Check if loan amount was changed
+      const loanAmountChanged = originalClient.loanAmount !== updatedClient.loanAmount;
+      
+      // STRICT: Only owner can edit loan amount
+      if (loanAmountChanged && currentUser !== 'william@boss.com') {
+        toast.error('Access Denied: Only the owner can edit loan amounts');
+        return;
+      }
+
+      // Staff can edit name, phone, address, and guarantor info
+      // Owner can edit everything
 
       // Save locally
       await clientsApi.update(updatedClient.id, updatedClient);
@@ -612,12 +622,12 @@ Call: +256709907775`;
         issuedBy: payment.recordedBy || currentUser || 'Admin',
       });
 
-      // 📱 Send SMS receipt (saves to history, doesn't actually send)
+      // 📱 Send SMS receipt via Africa's Talking
       try {
         const loanNumber = client.currentLoanNumber || 1;
         const smsMessage = `Dear ${clientName},\n\n✅ PAYMENT RECEIVED - Texas Finance\nAmount Paid: ${formatUGX(payment.amount)}\nDate: ${payment.date} at ${payment.time}\nTotal Paid: ${formatUGX(newTotalPaid)}\nRemaining Balance: ${formatUGX(newOutstandingBalance)}\n\nThank you for your payment!\nCall: +256709907775\n- Texas Finance Team`;
 
-        console.log('📤 Sending SMS with message:', smsMessage);
+        console.log('📤 Sending SMS receipt...');
 
         const smsResponse = await smsApi.send({
           recipients: [client.phoneNumber],
@@ -626,7 +636,7 @@ Call: +256709907775`;
           clientIds: [client.id],
         });
 
-        console.log('✅ STEP 4 Complete: SMS receipt sent successfully');
+        console.log('✅ SMS receipt sent successfully');
         console.log('📊 SMS API Response:', smsResponse);
         
         toast.success('Payment recorded & SMS receipt sent to client!', {
@@ -785,7 +795,7 @@ Call: +256709907775`;
       
       // 🔧 Reload all data from database to ensure we get the correct entries
       console.log('🔄 Reloading all data from database...');
-      await loadAllData();
+      await reloadData();
 
       toast.success(`${data.type} of ${formatUGX(data.amount)} recorded successfully!`);
     } catch (error) {
@@ -1185,7 +1195,7 @@ Call: +256709907775`;
       console.log('✅ Cashbook entry deleted, reloading all data...');
       
       // Reload all data to ensure consistency after cascading deletes
-      await loadAllData();
+      await reloadData();
       
       toast.success('Cashbook entry deleted successfully! Related records updated.');
     } catch (error) {
@@ -1244,8 +1254,8 @@ Call: +256709907775`;
         assignedTo: userEmail || undefined, // empty string means unassign
       };
 
-      // Save to localStorage
-      await clientsApi.update(clientId, updatedClient);
+      // Save to backend
+      await backendUpdateClient(clientId, updatedClient);
 
       // Update local state
       setClients(prevClients =>
@@ -1393,7 +1403,7 @@ Call: +256709907775`;
       
       // Also reload from database to confirm
       console.log('🔄 Reloading all data from database to verify...');
-      await loadAllData();
+      await reloadData();
       
       toast.success(`🧹 Cleanup Complete! Removed ${removedCount} duplicate entries.`, {
         duration: 8000,
@@ -1429,7 +1439,7 @@ Call: +256709907775`;
       <div className="min-h-screen bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
         <div className="text-center animate-scale-in">
           <div className="w-20 h-20 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-6 shadow-2xl"></div>
-          <p className="text-white text-2xl font-bold drop-shadow-lg">Loading GITARA BRANCH...</p>
+          <p className="text-white text-2xl font-bold drop-shadow-lg">Loading GITALA BRANCH...</p>
           <p className="text-emerald-100 text-sm mt-2">Please wait</p>
         </div>
       </div>
@@ -1518,6 +1528,8 @@ Call: +256709907775`;
               setShowEditPaymentModal(true);
             }}
             onDeletePayment={handleDeleteTransaction}
+            onSendReminder={() => setShowReminderModal(true)}
+            onCheckSMSBalance={() => setShowSMSBalanceModal(true)}
           />
         )}
         
@@ -1527,7 +1539,7 @@ Call: +256709907775`;
             onAddExpense={() => setShowAddExpenseModal(true)}
             onOwnerCapital={() => setShowOwnerCapitalModal(true)}
             onCleanupDuplicates={handleCleanupDuplicates}
-            onRefreshData={loadAllData}
+            onRefreshData={reloadData}
             onDeleteEntry={handleDeleteCashbook}
             currentUser={currentUser}
           />
@@ -1618,6 +1630,7 @@ Call: +256709907775`;
           }}
           client={editingClient}
           onUpdate={handleUpdateClient}
+          currentUser={currentUser}
         />
       )}
 
@@ -1672,6 +1685,21 @@ Call: +256709907775`;
         clients={clients}
         onAssignClient={handleAssignClient}
       />
+
+      {/* Reminder Modal */}
+      {showReminderModal && selectedClient && (
+        <ReminderModal
+          client={selectedClient}
+          onClose={() => setShowReminderModal(false)}
+        />
+      )}
+
+      {/* SMS Balance Modal */}
+      {showSMSBalanceModal && (
+        <SMSBalanceModal
+          onClose={() => setShowSMSBalanceModal(false)}
+        />
+      )}
 
       {/* Toaster for notifications */}
       <Toaster />

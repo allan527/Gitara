@@ -12,9 +12,9 @@ interface ClientAllocationModalProps {
 
 // List of all users in the system
 const ALL_USERS = [
-  { email: 'william@boss.com', name: 'GITARA BRANCH', role: 'Boss' },
+  { email: 'william@boss.com', name: 'GITALA BRANCH', role: 'Boss' },
   { email: 'cashier.com', name: 'Cashier', role: 'Cashier' },
-  { email: 'field1.com', name: 'Field Officer 1', role: 'Field Officer' },
+  { email: 'gasasira.com', name: 'Gasasira', role: 'Field Officer' },
   { email: 'field2.com', name: 'Field Officer 2', role: 'Field Officer' },
   { email: 'field3.com', name: 'Field Officer 3', role: 'Field Officer' },
   { email: 'field4.com', name: 'Field Officer 4', role: 'Field Officer' },

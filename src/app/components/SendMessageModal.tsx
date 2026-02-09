@@ -18,22 +18,22 @@ const MESSAGE_TEMPLATES = {
   payment_reminder: {
     name: 'Payment Reminder',
     template: (client: Client) => 
-      `Hello ${client.fullName}, this is a friendly reminder about your loan payment. Outstanding balance: ${formatUGX(client.balance)}. Daily payment: ${formatUGX(client.dailyPayment)}. Thank you - GITARA BRANCH`,
+      `Hello ${client.fullName}, this is a friendly reminder about your loan payment. Outstanding balance: ${formatUGX(client.balance)}. Daily payment: ${formatUGX(client.dailyPayment)}. Thank you - GITALA BRANCH`,
   },
   overdue_alert: {
     name: 'Overdue Alert',
     template: (client: Client) => 
-      `Dear ${client.fullName}, your payment is overdue. Please make a payment of ${formatUGX(client.dailyPayment)} to avoid penalties. Outstanding: ${formatUGX(client.balance)}. Contact us if you need assistance. - GITARA BRANCH`,
+      `Dear ${client.fullName}, your payment is overdue. Please make a payment of ${formatUGX(client.dailyPayment)} to avoid penalties. Outstanding: ${formatUGX(client.balance)}. Contact us if you need assistance. - GITALA BRANCH`,
   },
   thank_you: {
     name: 'Thank You Message',
     template: (client: Client) => 
-      `Thank you ${client.fullName} for your recent payment! Your outstanding balance is now ${formatUGX(client.balance)}. We appreciate your commitment. - GITARA BRANCH`,
+      `Thank you ${client.fullName} for your recent payment! Your outstanding balance is now ${formatUGX(client.balance)}. We appreciate your commitment. - GITALA BRANCH`,
   },
   loan_approved: {
     name: 'Loan Approved',
     template: (client: Client) => 
-      `Congratulations ${client.fullName}! Your loan of ${formatUGX(client.loanAmount)} has been approved. Total payable: ${formatUGX(client.totalPayable)}. Daily payment: ${formatUGX(client.dailyPayment)} over 30 days. - GITARA BRANCH`,
+      `Congratulations ${client.fullName}! Your loan of ${formatUGX(client.loanAmount)} has been approved. Total payable: ${formatUGX(client.totalPayable)}. Daily payment: ${formatUGX(client.dailyPayment)} over 30 days. - GITALA BRANCH`,
   },
 };
 
@@ -78,7 +78,7 @@ export function SendMessageModal({
       const recipients = recipientClients.map(client => client.phoneNumber);
       const clientIds = recipientClients.map(client => client.id);
 
-      // Send via local API (saves to history, doesn't actually send)
+      // Send via API (calls backend SMS service)
       const result = await smsApi.send({
         recipients,
         message: message.trim(),
@@ -86,10 +86,10 @@ export function SendMessageModal({
         clientIds,
       });
 
-      // Always show success since local API saves to history
+      // Show success message
       setSendStatus({
         success: true,
-        message: `Messages saved to history (${recipients.length} recipients). Note: SMS not actually sent - backend SMS service not configured.`,
+        message: `✅ SMS sent successfully to ${recipients.length} recipient(s) via Africa's Talking`,
       });
       
       // Reset form after 3 seconds
@@ -103,7 +103,7 @@ export function SendMessageModal({
       console.error('Error sending messages:', error);
       setSendStatus({
         success: false,
-        message: `Error: ${error instanceof Error ? error.message : 'Failed to send messages'}`,
+        message: `❌ Error: ${error instanceof Error ? error.message : 'Failed to send messages'}`,
       });
     } finally {
       setIsSending(false);

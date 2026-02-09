@@ -10,7 +10,7 @@ interface LoginProps {
 const VALID_USERS = [
   { email: 'william@boss.com', password: 'William2026', role: 'Boss' },
   { email: 'cashier.com', password: 'Cash2026#', role: 'Cashier' },
-  { email: 'field1.com', password: 'Field1@26', role: 'Field Officer' },
+  { email: 'gasasira.com', password: 'Gasasira2021', role: 'Field Officer' },
   { email: 'field2.com', password: 'Field2@26', role: 'Field Officer' },
   { email: 'field3.com', password: 'Field3@26', role: 'Field Officer' },
 ];
@@ -53,7 +53,7 @@ export function Login({ onLogin }: LoginProps) {
           <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-green-600 rounded-3xl flex items-center justify-center mb-6 shadow-2xl mx-auto transform hover:scale-110 transition-transform">
             <Lock className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-600">GITARA BRANCH</h1>
+          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-600">GITALA BRANCH</h1>
           <p className="text-gray-600 mt-3 font-medium">Sign in to your account</p>
         </div>
 
@@ -149,7 +149,7 @@ export function Login({ onLogin }: LoginProps) {
             </li>
             <li className="flex items-center gap-2">
               <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-              field1.com (Field Officer)
+              gasasira.com (Field Officer)
             </li>
             <li className="flex items-center gap-2">
               <span className="w-2 h-2 bg-purple-500 rounded-full"></span>

@@ -12,9 +12,10 @@ interface EditClientModalProps {
   onClose: () => void;
   onUpdate: (client: Client) => void;
   client: Client | null;
+  currentUser: string | null;
 }
 
-export function EditClientModal({ open, onClose, onUpdate, client }: EditClientModalProps) {
+export function EditClientModal({ open, onClose, onUpdate, client, currentUser }: EditClientModalProps) {
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
@@ -24,6 +25,9 @@ export function EditClientModal({ open, onClose, onUpdate, client }: EditClientM
   const [guarantorPhone, setGuarantorPhone] = useState('');
   const [guarantorLocation, setGuarantorLocation] = useState('');
   const [validationError, setValidationError] = useState('');
+
+  // Check if current user is owner
+  const isOwner = currentUser === 'william@boss.com';
 
   // 🆕 AUTO-CORRECTION SUGGESTIONS
   const clientPhoneCorrection = attemptPhoneCorrection(phoneNumber);
@@ -188,10 +192,17 @@ export function EditClientModal({ open, onClose, onUpdate, client }: EditClientM
               min="0"
               step="100"
               required
+              disabled={!isOwner}
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Note: Changing the loan amount will adjust the outstanding balance accordingly.
-            </p>
+            {!isOwner ? (
+              <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                🔒 Only the owner can edit loan amounts
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500 mt-1">
+                Note: Changing the loan amount will adjust the outstanding balance accordingly.
+              </p>
+            )}
           </div>
 
           {/* Loan Calculation Display */}

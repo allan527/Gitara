@@ -69,7 +69,7 @@ export const Sidebar = forwardRef<SidebarRef, SidebarProps>(({ activePage, onNav
       `}>
         {/* Logo/Brand with gradient */}
         <div className="p-6 border-b border-emerald-700 flex-shrink-0 bg-gradient-to-r from-emerald-600 to-green-600">
-          <h1 className="text-2xl font-bold text-white drop-shadow-md">GITARA BRANCH</h1>
+          <h1 className="text-2xl font-bold text-white drop-shadow-md">GITALA BRANCH</h1>
           <p className="text-sm text-emerald-100 mt-1">Loan Management</p>
         </div>
 

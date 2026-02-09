@@ -27,7 +27,7 @@ export function PaymentReceiptModal({ open, onClose, receiptData }: PaymentRecei
     // Header
     doc.setFontSize(22);
     doc.setFont(undefined, 'bold');
-    doc.text('GITARA BRANCH', 105, 25, { align: 'center' });
+    doc.text('GITALA BRANCH', 105, 25, { align: 'center' });
     
     doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
@@ -115,7 +115,7 @@ export function PaymentReceiptModal({ open, onClose, receiptData }: PaymentRecei
           {/* Receipt Content */}
           <div className="bg-gray-50 rounded-lg p-6 space-y-4">
             <div className="text-center pb-4 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">GITARA BRANCH</h3>
+              <h3 className="text-lg font-bold text-gray-900">GITALA BRANCH</h3>
               <p className="text-sm text-gray-600">Uganda</p>
             </div>
 

@@ -1,4 +1,4 @@
-import { ArrowLeft, Phone, MapPin, Calendar, DollarSign, TrendingUp, User, Clock, Plus, FileText, Shield, CreditCard, Briefcase, Edit, Trash2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Phone, MapPin, Calendar, DollarSign, TrendingUp, User, Clock, Plus, FileText, Shield, CreditCard, Briefcase, Edit, Trash2, CheckCircle2, Bell, Wallet } from 'lucide-react';
 import { Client, Transaction, formatUGX } from '../data/mockData';
 import { Card } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
@@ -17,6 +17,8 @@ interface ClientDetailProps {
   currentUser?: string | null;
   onEditPayment?: (transaction: Transaction) => void;
   onDeletePayment?: (transactionId: string) => void;
+  onSendReminder?: () => void;
+  onCheckSMSBalance?: () => void;
 }
 
 export function ClientDetail({ 
@@ -27,7 +29,9 @@ export function ClientDetail({
   onIssueNewLoan, 
   currentUser,
   onEditPayment,
-  onDeletePayment 
+  onDeletePayment,
+  onSendReminder,
+  onCheckSMSBalance
 }: ClientDetailProps) {
   const repaymentProgress = ((client.totalPaid / client.totalPayable) * 100).toFixed(1);
   
@@ -365,25 +369,45 @@ export function ClientDetail({
       {/* Transaction History */}
       <Card className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div className="p-6 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex flex-col gap-4">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">Transaction History</h2>
               <p className="text-sm text-gray-600 mt-1">All payment records for this client</p>
             </div>
-            <Button
-              onClick={onRecordPayment}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Record Payment
-            </Button>
-            <Button
-              onClick={printReceipt}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <FileText className="w-4 h-4 mr-2" />
-              Print Receipt
-            </Button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <Button
+                onClick={onRecordPayment}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Record Payment
+              </Button>
+              <Button
+                onClick={printReceipt}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Print Receipt
+              </Button>
+              {onSendReminder && (
+                <Button
+                  onClick={onSendReminder}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  <Bell className="w-4 h-4 mr-2" />
+                  Send Reminder
+                </Button>
+              )}
+              {onCheckSMSBalance && (
+                <Button
+                  onClick={onCheckSMSBalance}
+                  className="bg-gray-600 hover:bg-gray-700 text-white"
+                >
+                  <Wallet className="w-4 h-4 mr-2" />
+                  SMS Balance
+                </Button>
+              )}
+            </div>
           </div>
         </div>
         

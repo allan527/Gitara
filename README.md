@@ -224,7 +224,7 @@ All data is stored in browser localStorage:
 
 ---
 
-## 🎓 **LEARNING RESOURCES**
+## 📓 **LEARNING RESOURCES**
 
 - [React Documentation](https://react.dev)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
@@ -243,7 +243,7 @@ Private project for GITARA BRANCH internal use.
 
 Potential features to add:
 - [ ] Backend integration with Supabase
-- [ ] SMS notifications via Africa's Talking
+- [ ] SMS notifications
 - [ ] Multi-device sync
 - [ ] Export data to Excel
 - [ ] Automated payment reminders

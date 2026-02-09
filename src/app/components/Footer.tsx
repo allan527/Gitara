@@ -22,7 +22,7 @@ export function Footer({
           />
         </div>
         <p className="text-sm text-gray-600">
-          © 2026 GITARA BRANCH, Uganda. All Rights Reserved.
+          © 2026 GITALA BRANCH, Uganda. All Rights Reserved.
         </p>
         <div className="pt-2 border-t border-gray-200 inline-block px-6">
           <p className="text-sm font-semibold text-gray-800">

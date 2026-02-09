@@ -23,7 +23,7 @@ export function OwnerCapitalModal({ open, onClose, onSubmit, ownerCapitalTransac
   const [description, setDescription] = useState('');
 
   // Owner details - hardcoded
-  const OWNER_NAME = 'GITARA BRANCH';
+  const OWNER_NAME = 'GITALA BRANCH';
   const OWNER_PHONE = '+256709907775';
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -91,7 +91,7 @@ export function OwnerCapitalModal({ open, onClose, onSubmit, ownerCapitalTransac
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Owner Capital Transaction</DialogTitle>
-          <DialogDescription className="text-sm text-gray-600">Record capital injection or withdrawal by GITARA BRANCH</DialogDescription>
+          <DialogDescription className="text-sm text-gray-600">Record capital injection or withdrawal by GITALA BRANCH</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5">
