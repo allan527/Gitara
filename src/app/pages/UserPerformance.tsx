@@ -36,7 +36,7 @@ interface UserMetrics {
 const ALL_USERS = [
   { email: 'william@boss.com', name: 'Texas Finance', role: 'Boss' },
   { email: 'cashier.com', name: 'Cashier', role: 'Cashier' },
-  { email: 'field1.com', name: 'Field Officer 1', role: 'Field Officer' },
+  { email: 'gasasira.com', name: 'Gasasira', role: 'Field Officer' },
   { email: 'field2.com', name: 'Field Officer 2', role: 'Field Officer' },
   { email: 'field3.com', name: 'Field Officer 3', role: 'Field Officer' },
   { email: 'field4.com', name: 'Field Officer 4', role: 'Field Officer' },
