@@ -15,9 +15,8 @@ interface DailyData {
   totalPaymentsCollected: number;
   totalProcessingFees: number;
   totalCollections: number;
-  income: number; // 20% of payments collected
-  expense: number;
-  netProfit: number;
+  amountLoaned: number; // Total loans given on this day
+  expense: number; // Other expenses (excluding loan disbursements)
   totalOutstanding: number;
   closingBalance: number;
   businessCapital: number;
@@ -90,17 +89,17 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
       // Total collections = payments + processing fees
       const totalCollections = totalPaymentsCollected + totalProcessingFees;
       
-      // Income = 20% of total payments collected (not including processing fees)
-      const income = totalPaymentsCollected * 0.20;
+      // Amount loaned on this date
+      const loansOnDate = cashbookEntries.filter(
+        e => e.date === dateStr && e.type === 'Income' && e.description.includes('Loan disbursement')
+      );
+      const amountLoaned = loansOnDate.reduce((sum, e) => sum + e.amount, 0);
       
       // Calculate expenses on this date
       const expensesOnDate = cashbookEntries.filter(
         e => e.date === dateStr && e.type === 'Expense'
       );
       const expense = expensesOnDate.reduce((sum, e) => sum + e.amount, 0);
-      
-      // Net profit = income - expense
-      const netProfit = income - expense;
       
       let totalOutstanding = 0;
       let closingBalance = 0;
@@ -150,9 +149,8 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
         totalPaymentsCollected,
         totalProcessingFees,
         totalCollections,
-        income,
+        amountLoaned,
         expense,
-        netProfit,
         totalOutstanding,
         closingBalance,
         businessCapital,
@@ -169,9 +167,8 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
     totalPaymentsCollected: dailyData.reduce((sum, day) => sum + day.totalPaymentsCollected, 0),
     totalProcessingFees: dailyData.reduce((sum, day) => sum + day.totalProcessingFees, 0),
     totalCollections: dailyData.reduce((sum, day) => sum + day.totalCollections, 0),
-    income: dailyData.reduce((sum, day) => sum + day.income, 0),
+    amountLoaned: dailyData.reduce((sum, day) => sum + day.amountLoaned, 0),
     expense: dailyData.reduce((sum, day) => sum + day.expense, 0),
-    netProfit: dailyData.reduce((sum, day) => sum + day.netProfit, 0),
     // Use the last day's values for these (they don't accumulate across the week)
     totalOutstanding: dailyData.length > 0 ? dailyData[dailyData.length - 1].totalOutstanding : 0,
     closingBalance: dailyData.length > 0 ? dailyData[dailyData.length - 1].closingBalance : 0,
@@ -225,7 +222,7 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
       </div>
 
       {/* Weekly Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         {/* Total Payments Collected */}
         <div className="glass-card p-4 border-l-4 border-blue-500">
           <DollarSign className="w-6 h-6 text-blue-500 mb-2" />
@@ -250,12 +247,12 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
           <p className="text-xs text-gray-500 mt-0.5">Payments + Fees</p>
         </div>
 
-        {/* Weekly Income (20%) */}
-        <div className="glass-card p-4 border-l-4 border-emerald-500">
-          <TrendingUp className="w-6 h-6 text-emerald-500 mb-2" />
-          <p className="text-xs text-gray-600 mb-1">Income (20%)</p>
-          <p className="text-lg font-bold text-emerald-600">{formatUGX(weeklyTotals.income)}</p>
-          <p className="text-xs text-gray-500 mt-0.5">20% of collections</p>
+        {/* Amount Loaned */}
+        <div className="glass-card p-4 border-l-4 border-purple-500">
+          <Wallet className="w-6 h-6 text-purple-500 mb-2" />
+          <p className="text-xs text-gray-600 mb-1">Amount Loaned</p>
+          <p className="text-lg font-bold text-purple-600">{formatUGX(weeklyTotals.amountLoaned)}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Loans disbursed</p>
         </div>
 
         {/* Weekly Expenses */}
@@ -263,21 +260,7 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
           <Receipt className="w-6 h-6 text-red-500 mb-2" />
           <p className="text-xs text-gray-600 mb-1">Total Expenses</p>
           <p className="text-lg font-bold text-red-600">{formatUGX(weeklyTotals.expense)}</p>
-          <p className="text-xs text-gray-500 mt-0.5">All expenses</p>
-        </div>
-
-        {/* Net Profit/Loss */}
-        <div className={`glass-card p-4 border-l-4 ${weeklyTotals.netProfit >= 0 ? 'border-green-500' : 'border-orange-500'}`}>
-          {weeklyTotals.netProfit >= 0 ? (
-            <TrendingUp className="w-6 h-6 text-green-500 mb-2" />
-          ) : (
-            <TrendingDown className="w-6 h-6 text-orange-500 mb-2" />
-          )}
-          <p className="text-xs text-gray-600 mb-1">Net Profit/Loss</p>
-          <p className={`text-lg font-bold ${weeklyTotals.netProfit >= 0 ? 'text-green-600' : 'text-orange-600'}`}>
-            {formatUGX(weeklyTotals.netProfit)}
-          </p>
-          <p className="text-xs text-gray-500 mt-0.5">Income - Expenses</p>
+          <p className="text-xs text-gray-500 mt-0.5">Other expenses</p>
         </div>
       </div>
 
@@ -293,9 +276,8 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">Day</th>
                 <th className="text-right py-3 px-4 font-semibold text-gray-700">Collections</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Income (20%)</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700">Amount Loaned</th>
                 <th className="text-right py-3 px-4 font-semibold text-gray-700">Expenses</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Net Profit</th>
                 <th className="text-right py-3 px-4 font-semibold text-gray-700">Outstanding</th>
                 <th className="text-right py-3 px-4 font-semibold text-gray-700">Closing Balance</th>
                 <th className="text-right py-3 px-4 font-semibold text-gray-700">Business Capital</th>
@@ -309,16 +291,11 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
                   <td className="py-3 px-4 text-sm text-right font-medium text-blue-600">
                     {formatUGX(day.totalCollections)}
                   </td>
-                  <td className="py-3 px-4 text-sm text-right font-medium text-emerald-600">
-                    {formatUGX(day.income)}
+                  <td className="py-3 px-4 text-sm text-right font-medium text-purple-600">
+                    {formatUGX(day.amountLoaned)}
                   </td>
                   <td className="py-3 px-4 text-sm text-right font-medium text-red-600">
                     {formatUGX(day.expense)}
-                  </td>
-                  <td className={`py-3 px-4 text-sm text-right font-bold ${
-                    day.netProfit >= 0 ? 'text-green-600' : 'text-orange-600'
-                  }`}>
-                    {formatUGX(day.netProfit)}
                   </td>
                   <td className="py-3 px-4 text-sm text-right font-medium text-red-600">
                     {formatUGX(day.totalOutstanding)}
@@ -338,16 +315,11 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
                 <td className="py-4 px-4 text-sm text-right text-blue-600">
                   {formatUGX(weeklyTotals.totalCollections)}
                 </td>
-                <td className="py-4 px-4 text-sm text-right text-emerald-600">
-                  {formatUGX(weeklyTotals.income)}
+                <td className="py-4 px-4 text-sm text-right text-purple-600">
+                  {formatUGX(weeklyTotals.amountLoaned)}
                 </td>
                 <td className="py-4 px-4 text-sm text-right text-red-600">
                   {formatUGX(weeklyTotals.expense)}
-                </td>
-                <td className={`py-4 px-4 text-sm text-right ${
-                  weeklyTotals.netProfit >= 0 ? 'text-green-600' : 'text-orange-600'
-                }`}>
-                  {formatUGX(weeklyTotals.netProfit)}
                 </td>
                 <td className="py-4 px-4 text-sm text-right text-red-600">
                   {formatUGX(weeklyTotals.totalOutstanding)}
@@ -380,20 +352,12 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
                   <span className="text-sm font-medium text-blue-600">{formatUGX(day.totalCollections)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Income (20%):</span>
-                  <span className="text-sm font-medium text-emerald-600">{formatUGX(day.income)}</span>
+                  <span className="text-sm text-gray-600">Amount Loaned:</span>
+                  <span className="text-sm font-medium text-purple-600">{formatUGX(day.amountLoaned)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Expenses:</span>
                   <span className="text-sm font-medium text-red-600">{formatUGX(day.expense)}</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-gray-200">
-                  <span className="text-sm font-semibold text-gray-700">Net Profit:</span>
-                  <span className={`text-sm font-bold ${
-                    day.netProfit >= 0 ? 'text-green-600' : 'text-orange-600'
-                  }`}>
-                    {formatUGX(day.netProfit)}
-                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Outstanding:</span>
@@ -423,20 +387,12 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
                 <span className="text-sm font-bold text-blue-600">{formatUGX(weeklyTotals.totalCollections)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-700">Income (20%):</span>
-                <span className="text-sm font-bold text-emerald-600">{formatUGX(weeklyTotals.income)}</span>
+                <span className="text-sm text-gray-700">Amount Loaned:</span>
+                <span className="text-sm font-bold text-purple-600">{formatUGX(weeklyTotals.amountLoaned)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-700">Expenses:</span>
                 <span className="text-sm font-bold text-red-600">{formatUGX(weeklyTotals.expense)}</span>
-              </div>
-              <div className="flex justify-between pt-2 border-t-2 border-emerald-300">
-                <span className="text-sm font-bold text-gray-900">Net Profit:</span>
-                <span className={`text-sm font-bold ${
-                  weeklyTotals.netProfit >= 0 ? 'text-green-600' : 'text-orange-600'
-                }`}>
-                  {formatUGX(weeklyTotals.netProfit)}
-                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-700">Outstanding:</span>
@@ -460,9 +416,8 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
         <h3 className="font-semibold text-gray-900 mb-2">Calculation Methods</h3>
         <ul className="text-sm text-gray-700 space-y-1">
           <li>• <strong>Collections</strong> = Client payments + Processing fees (10,000 UGX per loan)</li>
-          <li>• <strong>Income</strong> = 20% of total daily payments collected from clients (excluding processing fees)</li>
+          <li>• <strong>Amount Loaned</strong> = Total loans given on this day</li>
           <li>• <strong>Expenses</strong> = All expenses recorded in the cashbook for that day</li>
-          <li>• <strong>Net Profit</strong> = Income - Expenses</li>
           <li>• <strong>Total Outstanding</strong> = Sum of all client outstanding balances as of that specific date (Total Payable - Payments Made)</li>
           <li>• <strong>Closing Balance</strong> = Cumulative cash balance (Income + Owner Capital In - Expenses - Owner Capital Out) up to that date</li>
           <li>• <strong>Business Capital</strong> = Total Outstanding + Closing Balance (includes owner capital injections/withdrawals)</li>
