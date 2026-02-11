@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Client } from '../data/mockData';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
@@ -26,12 +26,39 @@ export function AddClientModal({ open, onClose, onAdd, currentUser, existingClie
   const [guarantorPhone, setGuarantorPhone] = useState('');
   const [guarantorLocation, setGuarantorLocation] = useState('');
   const [duplicateError, setDuplicateError] = useState('');
+  const [duplicateWarning, setDuplicateWarning] = useState('');
 
   // Calculate loan details (20% monthly interest, 30 days repayment)
   const loanAmountNum = parseFloat(loanAmount) || 0;
   const interest = loanAmountNum * 0.20;
   const totalPayable = loanAmountNum + interest;
   const dailyPayment = totalPayable / 30;
+
+  // Real-time duplicate check whenever name, phone, or NIN changes
+  useEffect(() => {
+    if (!phoneNumber && !clientNIN) {
+      setDuplicateWarning('');
+      return;
+    }
+
+    const possibleDuplicates = existingClients.filter(client => {
+      const phoneMatch = phoneNumber && client.phoneNumber && 
+        normalizePhoneNumber(client.phoneNumber) === normalizePhoneNumber(phoneNumber);
+      const ninMatch = clientNIN && client.clientNIN && 
+        client.clientNIN.toLowerCase() === clientNIN.toLowerCase();
+      
+      return phoneMatch || ninMatch;
+    });
+
+    if (possibleDuplicates.length > 0) {
+      const duplicate = possibleDuplicates[0];
+      setDuplicateWarning(
+        `⚠️ Possible duplicate detected: ${duplicate.fullName} (${duplicate.phoneNumber}, NIN: ${duplicate.clientNIN || 'N/A'})`
+      );
+    } else {
+      setDuplicateWarning('');
+    }
+  }, [phoneNumber, clientNIN, existingClients]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +79,7 @@ export function AddClientModal({ open, onClose, onAdd, currentUser, existingClie
       }
     }
     
-    // Check for duplicates by NIN or phone number
+    // Check for duplicates by NIN or phone number ONLY
     const duplicateByNIN = existingClients.find(client => 
       client.clientNIN && clientNIN && client.clientNIN.toLowerCase() === clientNIN.toLowerCase()
     );
@@ -63,12 +90,12 @@ export function AddClientModal({ open, onClose, onAdd, currentUser, existingClie
     );
     
     if (duplicateByNIN) {
-      setDuplicateError(`A client with NIN "${clientNIN}" already exists: ${duplicateByNIN.fullName}. If this client needs a new loan, please use the "Issue New Loan" option instead.`);
+      setDuplicateError(`❌ A client with NIN "${clientNIN}" already exists: ${duplicateByNIN.fullName}. If this client needs a new loan, please use the "Issue New Loan" option instead.`);
       return;
     }
     
     if (duplicateByPhone) {
-      setDuplicateError(`A client with phone number "${phoneNumber}" already exists: ${duplicateByPhone.fullName}. If this client needs a new loan, please use the "Issue New Loan" option instead.`);
+      setDuplicateError(`❌ A client with phone number "${phoneNumber}" already exists: ${duplicateByPhone.fullName}. If this client needs a new loan, please use the "Issue New Loan" option instead.`);
       return;
     }
     
@@ -109,12 +136,13 @@ export function AddClientModal({ open, onClose, onAdd, currentUser, existingClie
     setGuarantorPhone('');
     setGuarantorLocation('');
     setDuplicateError('');
+    setDuplicateWarning('');
     onClose();
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">Add New Client</DialogTitle>
           <DialogDescription className="text-sm text-gray-500">
@@ -123,6 +151,19 @@ export function AddClientModal({ open, onClose, onAdd, currentUser, existingClie
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Real-time duplicate warning banner */}
+          {duplicateWarning && (
+            <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-yellow-900">Duplicate Client Warning</p>
+                  <p className="text-sm text-yellow-800 mt-1">{duplicateWarning}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <Label htmlFor="fullName">Full Name *</Label>
@@ -286,9 +327,11 @@ export function AddClientModal({ open, onClose, onAdd, currentUser, existingClie
           </div>
 
           {duplicateError && (
-            <div className="text-red-500 text-sm mt-2">
-              <AlertTriangle className="w-4 h-4 inline-block mr-1" />
-              {duplicateError}
+            <div className="bg-red-50 border-2 border-red-400 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-800">{duplicateError}</p>
+              </div>
             </div>
           )}
 

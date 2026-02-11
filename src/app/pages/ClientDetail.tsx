@@ -44,6 +44,22 @@ export function ClientDetail({
   // Filter transactions for this client
   const clientTransactions = transactions.filter(t => t.clientId === client.id);
 
+  // Calculate outstanding balance for each transaction (cumulative)
+  const transactionsWithOutstanding = clientTransactions.map((transaction, index) => {
+    // Calculate total paid up to and including this transaction
+    const paymentsUpToNow = clientTransactions
+      .slice(0, index + 1)
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    // Outstanding = Total Payable - Total Paid so far
+    const outstandingAtThisPoint = client.totalPayable - paymentsUpToNow;
+    
+    return {
+      ...transaction,
+      outstandingAtThisPoint: outstandingAtThisPoint > 0 ? outstandingAtThisPoint : 0,
+    };
+  });
+
   const printReceipt = () => {
     const doc = new jsPDF();
     
@@ -196,15 +212,18 @@ export function ClientDetail({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <a 
+                href={`tel:${client.phoneNumber}`}
+                className="flex items-center gap-3 hover:bg-blue-50 p-3 rounded-lg transition-colors cursor-pointer group"
+              >
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
                   <Phone className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Phone Number</p>
-                  <p className="font-medium text-gray-900">{client.phoneNumber}</p>
+                  <p className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">{client.phoneNumber}</p>
                 </div>
-              </div>
+              </a>
 
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -340,15 +359,18 @@ export function ClientDetail({
             )}
             
             {client.guarantorPhone && (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <a 
+                href={`tel:${client.guarantorPhone}`}
+                className="flex items-center gap-3 hover:bg-blue-50 p-3 rounded-lg transition-colors cursor-pointer group"
+              >
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
                   <Phone className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Phone Number</p>
-                  <p className="font-medium text-gray-900">{client.guarantorPhone}</p>
+                  <p className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">{client.guarantorPhone}</p>
                 </div>
-              </div>
+              </a>
             )}
             
             {client.guarantorLocation && (
@@ -418,6 +440,7 @@ export function ClientDetail({
                 <TableHead className="font-semibold">Date</TableHead>
                 <TableHead className="font-semibold">Time</TableHead>
                 <TableHead className="font-semibold text-right">Amount Paid</TableHead>
+                <TableHead className="font-semibold text-right">Outstanding Balance</TableHead>
                 <TableHead className="font-semibold">Notes</TableHead>
                 <TableHead className="font-semibold">Recorded By</TableHead>
                 <TableHead className="font-semibold">Status</TableHead>
@@ -434,12 +457,15 @@ export function ClientDetail({
                   </TableCell>
                 </TableRow>
               ) : (
-                clientTransactions.map((transaction) => (
+                transactionsWithOutstanding.map((transaction) => (
                   <TableRow key={transaction.id} className="hover:bg-gray-50">
                     <TableCell className="font-medium">{transaction.date}</TableCell>
                     <TableCell className="text-gray-600">{transaction.time}</TableCell>
                     <TableCell className="text-right font-medium text-green-600">
                       {formatUGX(transaction.amount)}
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-orange-600">
+                      {formatUGX(transaction.outstandingAtThisPoint)}
                     </TableCell>
                     <TableCell className="text-gray-600">
                       {/* 🆕 Show loan number badge if this is a repeat loan */}

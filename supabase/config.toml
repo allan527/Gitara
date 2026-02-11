@@ -7,12 +7,18 @@ enabled = true
 port = 54321
 schemas = ["public", "storage"]
 extra_search_path = ["public"]
-max_rows = 1000
+# Unlimited data retrieval (default is 1000)
+max_rows = 1000000
+# Maximum payload size for requests (default is 1MB, we set to 50MB)
+max_payload_size = "50MB"
 
 [db]
 port = 54322
 shadow_port = 54320
 major_version = 15
+# Increase database connection and memory limits
+pool_size = 100
+max_client_conn = 200
 
 [studio]
 enabled = true
@@ -23,6 +29,10 @@ enabled = false
 
 [storage]
 enabled = true
+# Unlimited storage configuration
+file_size_limit = "500GB"
+# No file size limit per upload (default is 50MB, we set to 5GB)
+max_file_size = "5GB"
 
 [auth]
 enabled = true

@@ -89,9 +89,9 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
       // Total collections = payments + processing fees
       const totalCollections = totalPaymentsCollected + totalProcessingFees;
       
-      // Amount loaned on this date
+      // Amount loaned on this date (loan disbursements from cashbook)
       const loansOnDate = cashbookEntries.filter(
-        e => e.date === dateStr && e.type === 'Income' && e.description.includes('Loan disbursement')
+        e => e.date === dateStr && e.status === 'Disbursement'
       );
       const amountLoaned = loansOnDate.reduce((sum, e) => sum + e.amount, 0);
       
