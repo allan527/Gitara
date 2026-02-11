@@ -95,9 +95,9 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
       );
       const amountLoaned = loansOnDate.reduce((sum, e) => sum + e.amount, 0);
       
-      // Calculate expenses on this date
+      // Calculate expenses on this date (EXCLUDE loan disbursements)
       const expensesOnDate = cashbookEntries.filter(
-        e => e.date === dateStr && e.type === 'Expense'
+        e => e.date === dateStr && e.type === 'Expense' && e.status !== 'Disbursement'
       );
       const expense = expensesOnDate.reduce((sum, e) => sum + e.amount, 0);
       
@@ -417,7 +417,7 @@ export function Evaluation({ transactions, cashbookEntries, clients, currentUser
         <ul className="text-sm text-gray-700 space-y-1">
           <li>• <strong>Collections</strong> = Client payments + Processing fees (10,000 UGX per loan)</li>
           <li>• <strong>Amount Loaned</strong> = Total loans given on this day</li>
-          <li>• <strong>Expenses</strong> = All expenses recorded in the cashbook for that day</li>
+          <li>• <strong>Expenses</strong> = All expenses recorded in the cashbook for that day (excluding loan disbursements)</li>
           <li>• <strong>Total Outstanding</strong> = Sum of all client outstanding balances as of that specific date (Total Payable - Payments Made)</li>
           <li>• <strong>Closing Balance</strong> = Cumulative cash balance (Income + Owner Capital In - Expenses - Owner Capital Out) up to that date</li>
           <li>• <strong>Business Capital</strong> = Total Outstanding + Closing Balance (includes owner capital injections/withdrawals)</li>
