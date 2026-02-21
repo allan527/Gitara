@@ -120,8 +120,9 @@ export function Cashbook({ entries, onAddExpense, onOwnerCapital, onCleanupDupli
           <p className="text-gray-600 mt-1">Track all income and expenses by day</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {/* Hidden: Recalculate Balances button */}
-          {/* {onRefreshData && isOwner && (
+          {/* Owner Capital Button */}
+          {/* Recalculate button removed - no longer needed */}
+          {/* {onRefreshData && (
             <Button
               onClick={onRefreshData}
               className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -130,7 +131,7 @@ export function Cashbook({ entries, onAddExpense, onOwnerCapital, onCleanupDupli
               Recalculate Balances
             </Button>
           )} */}
-          {onOwnerCapital && isOwner && (
+          {onOwnerCapital && (
             <Button
               onClick={onOwnerCapital}
               className="bg-amber-600 hover:bg-amber-700 text-white"

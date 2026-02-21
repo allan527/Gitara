@@ -589,21 +589,18 @@ export function DataView({
         <TabsContent value="capital" className="space-y-4">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Owner Capital</CardTitle>
-                  <CardDescription>
-                    Capital injections and withdrawals by Texas Finance
-                  </CardDescription>
-                </div>
-                {/* Only show button for william@boss.com */}
-                {currentUser === 'william@boss.com' && onOwnerCapital && (
-                  <Button onClick={onOwnerCapital} className="gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    Manage Capital
-                  </Button>
-                )}
+              <div className="flex items-center justify-between mb-6">
+                <CardDescription>
+                  Capital injections and withdrawals by Texas Finance
+                </CardDescription>
               </div>
+              {/* Owner Capital button - accessible to all users */}
+              {onOwnerCapital && (
+                <Button onClick={onOwnerCapital} className="gap-2 mb-4">
+                  <DollarSign className="h-4 w-4" />
+                  Manage Capital
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <DataTable
