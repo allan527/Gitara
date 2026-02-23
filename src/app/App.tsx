@@ -28,6 +28,17 @@ import { Client, Transaction, CashbookEntry, formatUGX, normalizePhoneNumber } f
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { clientsApi, transactionsApi, cashbookApi, ownerCapitalApi, smsApi } from '../services/localApi';
 
+// 💰 CALCULATE PROCESSING FEE BASED ON LOAN AMOUNT
+const calculateProcessingFee = (loanAmount: number): number => {
+  if (loanAmount < 350000) {
+    return 10000; // 0 - 349,999
+  } else if (loanAmount >= 350000 && loanAmount < 500000) {
+    return 15000; // 350,000 - 499,999
+  } else {
+    return 20000; // 500,000+
+  }
+};
+
 export default function App() {
   const sidebarRef = useRef<any>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -359,14 +370,17 @@ Call: +256709907775`;
         enteredBy: currentUser || 'System',
       };
       
-      // Add processing fee to cashbook (10,000 UGX)
+      // Calculate processing fee based on loan amount
+      const processingFee = calculateProcessingFee(normalizedClient.loanAmount);
+      
+      // Add processing fee to cashbook
       const processingFeeEntry: CashbookEntry = {
         id: `c${Date.now() + 1}`,
         date: currentDate,
         time: currentTime,
         description: `Processing fee - ${normalizedClient.fullName}`,
         type: 'Income',
-        amount: 10000,
+        amount: processingFee,
         status: 'Profit',
         enteredBy: currentUser || 'System',
       };
@@ -407,7 +421,7 @@ Call: +256709907775`;
         `Phone: ${normalizedClient.phoneNumber}\n` +
         `Loan Amount: ${formatUGX(normalizedClient.loanAmount)}\n` +
         `Total Payable: ${formatUGX(normalizedClient.totalPayable)}\n` +
-        `Processing Fee: UGX 10,000\n` +
+        `Processing Fee: ${formatUGX(processingFee)}\n` +
         `Start Date: ${formatDate(startDate)}\n` +
         `Deadline: ${formatDate(deadline)}\n\n` +
         `All records created successfully!`,
@@ -967,13 +981,16 @@ Call: +256709907775`;
         enteredBy: currentUser || 'System',
       };
 
+      // Calculate processing fee based on loan amount
+      const processingFee = calculateProcessingFee(loanAmount);
+
       const processingFeeEntry: CashbookEntry = {
         id: `c${Date.now() + 1}`,
         date: currentDate,
         time: currentTime,
         description: `💵 Processing Fee (Loan #${newLoanNumber}) - ${client.fullName}`,
         type: 'Income',
-        amount: 10000,
+        amount: processingFee,
         status: 'Profit',
         enteredBy: currentUser || 'System',
       };
@@ -1025,7 +1042,7 @@ Call: +256709907775`;
         `Phone: ${updatedClient.phoneNumber}\n` +
         `Loan Amount: ${formatUGX(loanAmount)}\n` +
         `Total Payable: ${formatUGX(totalPayable)}\n` +
-        `Processing Fee: UGX 10,000\n` +
+        `Processing Fee: ${formatUGX(processingFee)}\n` +
         `Start Date: ${formatDate(startDate)}\n` +
         `Deadline: ${formatDate(deadline)}\n\n` +
         `All records created successfully!`,
