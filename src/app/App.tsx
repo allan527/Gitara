@@ -19,6 +19,8 @@ import { DataView } from './pages/DataView';
 import { MissedPayments } from './pages/MissedPayments';
 import { UserPerformance } from './pages/UserPerformance';
 import { Evaluation } from './pages/Evaluation';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { UserManagement } from './pages/UserManagement';
 import { Login } from './pages/Login';
 import { DataMigration } from './pages/DataMigration';
 import { MobileHeader } from './components/MobileHeader';
@@ -1625,6 +1627,18 @@ Call: +256709907775`;
             transactions={transactions}
             cashbookEntries={cashbookEntries}
             clients={clients}
+            currentUser={currentUser}
+          />
+        )}
+        
+        {activePage === 'admin-dashboard' && (
+          <AdminDashboard 
+            currentUser={currentUser}
+          />
+        )}
+        
+        {activePage === 'user-management' && (
+          <UserManagement 
             currentUser={currentUser}
           />
         )}

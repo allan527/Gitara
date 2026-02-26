@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, UserPlus, Book, FileText, X, Menu, LogOut, User, Database, AlertCircle, Award, UserCog, PieChart } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, Book, FileText, X, Menu, LogOut, User, Database, AlertCircle, Award, UserCog, PieChart, Smartphone, Shield } from 'lucide-react';
 import { useState, useImperativeHandle, forwardRef } from 'react';
 
 interface SidebarProps {
@@ -32,6 +32,8 @@ export const Sidebar = forwardRef<SidebarRef, SidebarProps>(({ activePage, onNav
     { id: 'history', label: 'Reports / History', icon: FileText },
     ...(isOwner ? [{ id: 'evaluation', label: 'Evaluation', icon: PieChart }] : []),
     { id: 'data-view', label: 'Data View', icon: Database },
+    { id: 'admin-dashboard', label: 'SMS Admin', icon: Smartphone },
+    ...(isOwner ? [{ id: 'user-management', label: 'User Management', icon: Shield }] : []),
   ];
 
   const handleNavigation = (page: string) => {

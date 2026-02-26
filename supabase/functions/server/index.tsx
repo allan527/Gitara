@@ -332,6 +332,157 @@ app.post('/make-server-7f28f6fd/sync', async (c) => {
 });
 
 // ============================================
+// USER MANAGEMENT ENDPOINTS
+// ============================================
+
+// Get all users (only accessible by william@boss.com)
+app.get('/make-server-7f28f6fd/users', async (c) => {
+  try {
+    const users = await kv.getByPrefix('user:');
+    
+    // If no users exist, initialize with default users
+    if (!users || users.length === 0) {
+      const defaultUsers = [
+        { email: 'william@boss.com', password: 'William2026', role: 'Boss', createdAt: new Date().toISOString() },
+        { email: 'cashier.com', password: 'Cash2026#', role: 'Cashier', createdAt: new Date().toISOString() },
+        { email: 'gasasira.com', password: 'Gasasira2021', role: 'Field Officer', createdAt: new Date().toISOString() },
+        { email: 'field2.com', password: 'Field2@26', role: 'Field Officer', createdAt: new Date().toISOString() },
+        { email: 'field3.com', password: 'Field3@26', role: 'Field Officer', createdAt: new Date().toISOString() },
+      ];
+      
+      for (const user of defaultUsers) {
+        await kv.set(`user:${user.email}`, user);
+      }
+      
+      return c.json({ users: defaultUsers });
+    }
+    
+    return c.json({ users: users || [] });
+  } catch (error) {
+    console.log('Error fetching users:', error);
+    return c.json({ error: 'Failed to fetch users', details: String(error) }, 500);
+  }
+});
+
+// Get single user by email (for login)
+app.get('/make-server-7f28f6fd/users/:email', async (c) => {
+  try {
+    const email = c.req.param('email');
+    const user = await kv.get(`user:${email}`);
+    
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+    
+    return c.json({ user });
+  } catch (error) {
+    console.log('Error fetching user:', error);
+    return c.json({ error: 'Failed to fetch user', details: String(error) }, 500);
+  }
+});
+
+// Add new user (only accessible by william@boss.com)
+app.post('/make-server-7f28f6fd/users', async (c) => {
+  try {
+    const { email, password, role, requestedBy } = await c.req.json();
+    
+    // Check if requester is the owner
+    if (requestedBy !== 'william@boss.com') {
+      return c.json({ error: 'Unauthorized. Only the owner can add users.' }, 403);
+    }
+    
+    // Check if user already exists
+    const existingUser = await kv.get(`user:${email}`);
+    if (existingUser) {
+      return c.json({ error: 'User already exists' }, 400);
+    }
+    
+    const newUser = {
+      email,
+      password,
+      role,
+      createdAt: new Date().toISOString(),
+      createdBy: requestedBy,
+    };
+    
+    await kv.set(`user:${email}`, newUser);
+    
+    console.log(`✅ User created: ${email} by ${requestedBy}`);
+    
+    return c.json({ user: newUser });
+  } catch (error) {
+    console.log('Error adding user:', error);
+    return c.json({ error: 'Failed to add user', details: String(error) }, 500);
+  }
+});
+
+// Update user password (only accessible by william@boss.com)
+app.put('/make-server-7f28f6fd/users/:email/password', async (c) => {
+  try {
+    const email = c.req.param('email');
+    const { newPassword, requestedBy } = await c.req.json();
+    
+    // Check if requester is the owner
+    if (requestedBy !== 'william@boss.com') {
+      return c.json({ error: 'Unauthorized. Only the owner can change passwords.' }, 403);
+    }
+    
+    const existing = await kv.get(`user:${email}`);
+    if (!existing) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+    
+    const updated = {
+      ...existing,
+      password: newPassword,
+      updatedAt: new Date().toISOString(),
+      updatedBy: requestedBy,
+    };
+    
+    await kv.set(`user:${email}`, updated);
+    
+    console.log(`✅ Password changed for: ${email} by ${requestedBy}`);
+    
+    return c.json({ user: updated });
+  } catch (error) {
+    console.log('Error updating password:', error);
+    return c.json({ error: 'Failed to update password', details: String(error) }, 500);
+  }
+});
+
+// Delete user (only accessible by william@boss.com)
+app.delete('/make-server-7f28f6fd/users/:email', async (c) => {
+  try {
+    const email = c.req.param('email');
+    const requestedBy = c.req.query('requestedBy');
+    
+    // Check if requester is the owner
+    if (requestedBy !== 'william@boss.com') {
+      return c.json({ error: 'Unauthorized. Only the owner can delete users.' }, 403);
+    }
+    
+    // Prevent deleting the owner account
+    if (email === 'william@boss.com') {
+      return c.json({ error: 'Cannot delete the owner account' }, 403);
+    }
+    
+    const user = await kv.get(`user:${email}`);
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+    
+    await kv.del(`user:${email}`);
+    
+    console.log(`✅ User deleted: ${email} by ${requestedBy}`);
+    
+    return c.json({ success: true, message: 'User deleted successfully' });
+  } catch (error) {
+    console.log('Error deleting user:', error);
+    return c.json({ error: 'Failed to delete user', details: String(error) }, 500);
+  }
+});
+
+// ============================================
 // SMS ENDPOINT
 // ============================================
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { LogIn, Lock, User } from 'lucide-react';
+import { projectId, publicAnonKey } from '/utils/supabase/info';
 
 interface LoginProps {
   onLogin: (email: string) => void;
@@ -21,24 +22,59 @@ export function Login({ onLogin }: LoginProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const API_BASE = `https://${projectId}.supabase.co/functions/v1/make-server-7f28f6fd`;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    // Simulate a brief loading state
-    setTimeout(() => {
-      const user = VALID_USERS.find(
+    try {
+      // First, try to authenticate with backend
+      const response = await fetch(`${API_BASE}/users/${encodeURIComponent(email)}`, {
+        headers: {
+          'Authorization': `Bearer ${publicAnonKey}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const user = data.user;
+        
+        // Check if password matches
+        if (user && user.password === password) {
+          onLogin(user.email);
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // Fallback to hardcoded users if backend fails or user not found
+      const fallbackUser = VALID_USERS.find(
         (u) => u.email === email && u.password === password
       );
 
-      if (user) {
-        onLogin(user.email);
+      if (fallbackUser) {
+        onLogin(fallbackUser.email);
       } else {
         setError('Invalid email or password');
       }
+    } catch (err) {
+      console.error('Login error:', err);
+      
+      // Fallback to hardcoded users on error
+      const fallbackUser = VALID_USERS.find(
+        (u) => u.email === email && u.password === password
+      );
+
+      if (fallbackUser) {
+        onLogin(fallbackUser.email);
+      } else {
+        setError('Invalid email or password');
+      }
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (
