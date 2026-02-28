@@ -1,8 +1,9 @@
-import { TrendingUp, TrendingDown, DollarSign, Plus, Crown, Trash2, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Plus, Crown, Trash2, RefreshCw, Wrench, Search, X } from 'lucide-react';
 import { CashbookEntry, formatUGX } from '../data/mockData';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Footer } from '../components/Footer';
+import { useState } from 'react';
 
 interface CashbookProps {
   entries: CashbookEntry[];
@@ -10,7 +11,8 @@ interface CashbookProps {
   onOwnerCapital?: () => void;
   onCleanupDuplicates?: () => void;
   onRefreshData?: () => void;
-  onDeleteEntry?: (entryId: string) => void; // 🆕 Add delete handler
+  onDeleteEntry?: (entryId: string) => void;
+  onRepairCashbook?: () => void;
   currentUser?: string | null;
 }
 
@@ -44,12 +46,34 @@ function TableCell({ children, className }: { children: React.ReactNode; classNa
   return <td className={`px-4 py-3 text-sm ${className || ''}`}>{children}</td>;
 }
 
-export function Cashbook({ entries, onAddExpense, onOwnerCapital, onCleanupDuplicates, onRefreshData, onDeleteEntry, currentUser }: CashbookProps) {
+export function Cashbook({ entries, onAddExpense, onOwnerCapital, onCleanupDuplicates, onRefreshData, onDeleteEntry, onRepairCashbook, currentUser }: CashbookProps) {
   // Check if current user is the owner
   const isOwner = currentUser === 'william@boss.com';
 
-  // Group entries by date
-  const entriesByDate = entries.reduce((acc, entry) => {
+  // Search functionality
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter entries based on search term
+  const filteredEntries = entries.filter(entry => {
+    if (!searchTerm.trim()) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    
+    // Search across multiple fields
+    return (
+      entry.description.toLowerCase().includes(searchLower) ||
+      entry.date.toLowerCase().includes(searchLower) ||
+      entry.time?.toLowerCase().includes(searchLower) ||
+      entry.amount.toString().includes(searchLower) ||
+      entry.type.toLowerCase().includes(searchLower) ||
+      entry.status.toLowerCase().includes(searchLower) ||
+      entry.enteredBy?.toLowerCase().includes(searchLower) ||
+      formatUGX(entry.amount).toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Group filtered entries by date
+  const entriesByDate = filteredEntries.reduce((acc, entry) => {
     if (!acc[entry.date]) {
       acc[entry.date] = [];
     }
@@ -140,6 +164,24 @@ export function Cashbook({ entries, onAddExpense, onOwnerCapital, onCleanupDupli
               Owner Capital
             </Button>
           )}
+          {onRepairCashbook && isOwner && (
+            <Button
+              onClick={onRepairCashbook}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              <Wrench className="w-4 h-4 mr-2" />
+              Repair Cashbook
+            </Button>
+          )}
+          {onCleanupDuplicates && isOwner && (
+            <Button
+              onClick={onCleanupDuplicates}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Remove Duplicates
+            </Button>
+          )}
           <Button
             onClick={onAddExpense}
             className="bg-red-600 hover:bg-red-700 text-white"
@@ -149,6 +191,45 @@ export function Cashbook({ entries, onAddExpense, onOwnerCapital, onCleanupDupli
           </Button>
         </div>
       </div>
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <input
+          type="text"
+          placeholder="Search by description, date, time, amount, type, or user..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
+        />
+        {searchTerm && (
+          <button
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={() => setSearchTerm('')}
+            title="Clear search"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
+      {/* Search Results Info */}
+      {searchTerm && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-emerald-600" />
+            <p className="text-sm text-emerald-800">
+              Found <strong>{filteredEntries.length}</strong> transaction{filteredEntries.length !== 1 ? 's' : ''} matching "<strong>{searchTerm}</strong>"
+            </p>
+          </div>
+          <button
+            onClick={() => setSearchTerm('')}
+            className="text-sm text-emerald-700 hover:text-emerald-900 font-medium underline"
+          >
+            Clear filter
+          </button>
+        </div>
+      )}
 
       {/* Overall Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -205,156 +286,180 @@ export function Cashbook({ entries, onAddExpense, onOwnerCapital, onCleanupDupli
 
       {/* Daily Cashbook Entries */}
       <div className="space-y-6">
-        {dailyBalances.map((summary) => (
-          <Card key={summary.date} className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            {/* Daily Summary Header */}
-            <div className="bg-gray-50 p-5 border-b border-gray-200">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    {new Date(summary.date).toLocaleDateString('en-UG', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </h2>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {summary.entries.length} transaction{summary.entries.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 w-full md:w-auto md:gap-4">
-                  <div className="text-center">
-                    <p className="text-xs text-gray-600 mb-1">Income</p>
-                    <p className="font-semibold text-green-600 text-sm md:text-base">{formatUGX(summary.totalIncome)}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-gray-600 mb-1">Expenses</p>
-                    <p className="font-semibold text-red-600 text-sm md:text-base">{formatUGX(summary.totalExpenses)}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-gray-600 mb-1">Net</p>
-                    <p className={`font-semibold text-sm md:text-base ${summary.netBalance >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                      {formatUGX(summary.netBalance)}
+        {dailyBalances.length === 0 && searchTerm ? (
+          <Card className="bg-white border border-gray-200 rounded-xl shadow-sm p-12 text-center">
+            <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No transactions found</h3>
+            <p className="text-gray-600 mb-4">
+              No cashbook entries match your search for "<strong>{searchTerm}</strong>"
+            </p>
+            <button
+              onClick={() => setSearchTerm('')}
+              className="text-emerald-600 hover:text-emerald-700 font-medium underline"
+            >
+              Clear search and show all transactions
+            </button>
+          </Card>
+        ) : dailyBalances.length === 0 ? (
+          <Card className="bg-white border border-gray-200 rounded-xl shadow-sm p-12 text-center">
+            <DollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No cashbook entries yet</h3>
+            <p className="text-gray-600">
+              Start by adding expenses or recording client payments.
+            </p>
+          </Card>
+        ) : (
+          dailyBalances.map((summary) => (
+            <Card key={summary.date} className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              {/* Daily Summary Header */}
+              <div className="bg-gray-50 p-5 border-b border-gray-200">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      {new Date(summary.date).toLocaleDateString('en-UG', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {summary.entries.length} transaction{summary.entries.length !== 1 ? 's' : ''}
                     </p>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 w-full md:w-auto md:gap-4">
+                    <div className="text-center">
+                      <p className="text-xs text-gray-600 mb-1">Income</p>
+                      <p className="font-semibold text-green-600 text-sm md:text-base">{formatUGX(summary.totalIncome)}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs text-gray-600 mb-1">Expenses</p>
+                      <p className="font-semibold text-red-600 text-sm md:text-base">{formatUGX(summary.totalExpenses)}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs text-gray-600 mb-1">Net</p>
+                      <p className={`font-semibold text-sm md:text-base ${summary.netBalance >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                        {formatUGX(summary.netBalance)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Daily Transactions Table */}
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="font-semibold">Time</TableHead>
-                    <TableHead className="font-semibold">Description</TableHead>
-                    <TableHead className="font-semibold">Type</TableHead>
-                    <TableHead className="font-semibold">Entered By</TableHead>
-                    <TableHead className="font-semibold text-right">Amount</TableHead>
-                    <TableHead className="font-semibold text-right">Balance</TableHead>
-                    {/* Hidden: Delete Actions column */}
-                    {/* {onDeleteEntry && isOwner && (
-                      <TableHead className="font-semibold text-right">Actions</TableHead>
-                    )} */}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {/* Opening Balance Row */}
-                  <TableRow className="bg-blue-50 hover:bg-blue-50">
-                    <TableCell className="font-bold">—</TableCell>
-                    <TableCell className="font-bold text-blue-900">Opening Balance</TableCell>
-                    <TableCell>—</TableCell>
-                    <TableCell>—</TableCell>
-                    <TableCell className="text-right">—</TableCell>
-                    <TableCell className="text-right font-bold text-blue-900">
-                      {formatUGX(summary.openingBalance)}
-                    </TableCell>
-                    {/* Hidden: Delete button */}
-                    {/* {onDeleteEntry && isOwner && (
+              {/* Daily Transactions Table */}
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="font-semibold">Time</TableHead>
+                      <TableHead className="font-semibold">Description</TableHead>
+                      <TableHead className="font-semibold">Type</TableHead>
+                      <TableHead className="font-semibold">Entered By</TableHead>
+                      <TableHead className="font-semibold text-right">Amount</TableHead>
+                      <TableHead className="font-semibold text-right">Balance</TableHead>
+                      {/* Hidden: Delete Actions column */}
+                      {/* {onDeleteEntry && isOwner && (
+                        <TableHead className="font-semibold text-right">Actions</TableHead>
+                      )} */}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {/* Opening Balance Row */}
+                    <TableRow className="bg-blue-50 hover:bg-blue-50">
+                      <TableCell className="font-bold">—</TableCell>
+                      <TableCell className="font-bold text-blue-900">Opening Balance</TableCell>
+                      <TableCell>—</TableCell>
+                      <TableCell>—</TableCell>
                       <TableCell className="text-right">—</TableCell>
-                    )} */}
-                  </TableRow>
+                      <TableCell className="text-right font-bold text-blue-900">
+                        {formatUGX(summary.openingBalance)}
+                      </TableCell>
+                      {/* Hidden: Delete button */}
+                      {/* {onDeleteEntry && isOwner && (
+                        <TableCell className="text-right">—</TableCell>
+                      )} */}
+                    </TableRow>
 
-                  {/* Transaction Rows */}
-                  {summary.entries
-                    .sort((a, b) => {
-                      // Sort by ID timestamp only (original order of recording)
-                      const timestampA = parseInt(a.id.replace(/\D/g, '')) || 0;
-                      const timestampB = parseInt(b.id.replace(/\D/g, '')) || 0;
-                      return timestampA - timestampB;
-                    })
-                    .reduce((acc, entry, index) => {
-                      // Calculate running balance
-                      const previousBalance = index === 0 
-                        ? summary.openingBalance 
-                        : acc[index - 1].runningBalance;
-                      const runningBalance = previousBalance + (entry.type === 'Income' ? entry.amount : -entry.amount);
-                      
-                      acc.push({ ...entry, runningBalance });
-                      return acc;
-                    }, [] as Array<CashbookEntry & { runningBalance: number }>)
-                    .map((entry) => (
-                      <TableRow key={entry.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium">{entry.time || '—'}</TableCell>
-                        <TableCell className="text-gray-600">{entry.description}</TableCell>
-                        <TableCell>
-                          <Badge
-                            className={
-                              entry.type === 'Income'
-                                ? 'bg-green-100 text-green-700 hover:bg-green-100'
-                                : 'bg-red-100 text-red-700 hover:bg-red-100'
-                            }
-                          >
-                            {entry.type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-600">
-                          {entry.enteredBy || currentUser || 'System'}
-                        </TableCell>
-                        <TableCell className={`text-right font-semibold ${
-                          entry.type === 'Income' ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {entry.type === 'Income' ? '+' : '-'}{formatUGX(entry.amount)}
-                        </TableCell>
-                        <TableCell className="text-right font-semibold text-gray-900">
-                          {formatUGX(entry.runningBalance)}
-                        </TableCell>
-                        {/* Hidden: Delete button for each transaction */}
-                        {/* {onDeleteEntry && isOwner && (
-                          <TableCell className="text-right">
-                            <Button
-                              onClick={() => onDeleteEntry(entry.id)}
-                              className="bg-red-600 hover:bg-red-700 text-white"
+                    {/* Transaction Rows */}
+                    {summary.entries
+                      .sort((a, b) => {
+                        // Sort by ID timestamp only (original order of recording)
+                        const timestampA = parseInt(a.id.replace(/\D/g, '')) || 0;
+                        const timestampB = parseInt(b.id.replace(/\D/g, '')) || 0;
+                        return timestampA - timestampB;
+                      })
+                      .reduce((acc, entry, index) => {
+                        // Calculate running balance
+                        const previousBalance = index === 0 
+                          ? summary.openingBalance 
+                          : acc[index - 1].runningBalance;
+                        const runningBalance = previousBalance + (entry.type === 'Income' ? entry.amount : -entry.amount);
+                        
+                        acc.push({ ...entry, runningBalance });
+                        return acc;
+                      }, [] as Array<CashbookEntry & { runningBalance: number }>)
+                      .map((entry) => (
+                        <TableRow key={entry.id} className="hover:bg-gray-50">
+                          <TableCell className="font-medium">{entry.time || '—'}</TableCell>
+                          <TableCell className="text-gray-600">{entry.description}</TableCell>
+                          <TableCell>
+                            <Badge
+                              className={
+                                entry.type === 'Income'
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-100'
+                                  : 'bg-red-100 text-red-700 hover:bg-red-100'
+                              }
                             >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                              {entry.type}
+                            </Badge>
                           </TableCell>
-                        )} */}
-                      </TableRow>
-                    ))}
+                          <TableCell className="text-sm text-gray-600">
+                            {entry.enteredBy || currentUser || 'System'}
+                          </TableCell>
+                          <TableCell className={`text-right font-semibold ${
+                            entry.type === 'Income' ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {entry.type === 'Income' ? '+' : '-'}{formatUGX(entry.amount)}
+                          </TableCell>
+                          <TableCell className="text-right font-semibold text-gray-900">
+                            {formatUGX(entry.runningBalance)}
+                          </TableCell>
+                          {/* Hidden: Delete button for each transaction */}
+                          {/* {onDeleteEntry && isOwner && (
+                            <TableCell className="text-right">
+                              <Button
+                                onClick={() => onDeleteEntry(entry.id)}
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          )} */}
+                        </TableRow>
+                      ))}
 
-                  {/* Closing Balance Row */}
-                  <TableRow className="bg-purple-50 hover:bg-purple-50 border-t-2 border-purple-200">
-                    <TableCell className="font-bold">—</TableCell>
-                    <TableCell className="font-bold text-purple-900">Closing Balance</TableCell>
-                    <TableCell>—</TableCell>
-                    <TableCell>—</TableCell>
-                    <TableCell className="text-right">—</TableCell>
-                    <TableCell className="text-right font-bold text-purple-900">
-                      {formatUGX(summary.closingBalance)}
-                    </TableCell>
-                    {/* Hidden: Delete action cell for closing balance */}
-                    {/* {onDeleteEntry && isOwner && (
+                    {/* Closing Balance Row */}
+                    <TableRow className="bg-purple-50 hover:bg-purple-50 border-t-2 border-purple-200">
+                      <TableCell className="font-bold">—</TableCell>
+                      <TableCell className="font-bold text-purple-900">Closing Balance</TableCell>
+                      <TableCell>—</TableCell>
+                      <TableCell>—</TableCell>
                       <TableCell className="text-right">—</TableCell>
-                    )} */}
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
-          </Card>
-        ))}
+                      <TableCell className="text-right font-bold text-purple-900">
+                        {formatUGX(summary.closingBalance)}
+                      </TableCell>
+                      {/* Hidden: Delete action cell for closing balance */}
+                      {/* {onDeleteEntry && isOwner && (
+                        <TableCell className="text-right">—</TableCell>
+                      )} */}
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          ))
+        )}
       </div>
       <Footer />
     </div>

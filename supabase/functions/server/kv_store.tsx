@@ -81,13 +81,18 @@ export const getByPrefix = async (prefix: string): Promise<any[]> => {
   const supabase = client()
   // 🔧 FIX: Supabase has a default limit of 1000 rows. We need to fetch ALL records.
   // Using a very high limit to ensure we get all cashbook entries (can grow to 10,000+)
+  // Also order by key to ensure consistent ordering
   const { data, error } = await supabase
     .from("kv_store_7f28f6fd")
     .select("key, value")
     .like("key", prefix + "%")
+    .order('key', { ascending: false }) // Get newest first
     .limit(50000); // Set a high limit to accommodate large datasets
   if (error) {
     throw new Error(error.message);
   }
-  return data?.map((d) => d.value) ?? [];
+  
+  const results = data?.map((d) => d.value) ?? [];
+  console.log(`🔍 KV getByPrefix("${prefix}"): Found ${results.length} records`);
+  return results;
 };

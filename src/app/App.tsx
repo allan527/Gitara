@@ -134,6 +134,7 @@ export default function App() {
 
   // 🔧 DATA REPAIR FUNCTION - Recreate missing cashbook entries from transactions
   const repairMissingCashbookEntries = async () => {
+    let loadingToast: any = null;
     try {
       console.log('🔧 STARTING DATA REPAIR: Checking for missing cashbook entries...');
       
@@ -190,13 +191,20 @@ export default function App() {
         return;
       }
       
-      console.log('🔄 Repairing cashbook entries...');
+      // Show loading toast
+      loadingToast = toast.loading('🔄 Repairing cashbook entries... Please wait...');
       
-      // Create missing cashbook entries
+      console.log('🔄 Repairing cashbook entries...');
+      console.log(`📋 Will repair ${missingEntries.length} entries`);
+      
+      // Create missing cashbook entries - SEQUENTIAL to ensure proper saving
       let repairedCount = 0;
-      for (const transaction of missingEntries) {
+      const successfullyRepairedIds: string[] = [];
+      
+      for (let i = 0; i < missingEntries.length; i++) {
+        const transaction = missingEntries[i];
         const newCashbookEntry: CashbookEntry = {
-          id: `c${Date.now()}_repair_${repairedCount}`,
+          id: `c${Date.now()}_repair_${i}`,
           date: transaction.date,
           time: transaction.time || '00:00',
           description: `Loan repayment - ${transaction.clientName}`,
@@ -206,27 +214,72 @@ export default function App() {
           enteredBy: transaction.recordedBy || 'System (Repaired)',
         };
         
-        // Save to local storage
-        await cashbookApi.create(newCashbookEntry);
+        console.log(`💾 [${i + 1}/${missingEntries.length}] Saving: ${transaction.clientName} - ${formatUGX(transaction.amount)}`);
         
-        // Update local state
-        setCashbookEntries(prev => [newCashbookEntry, ...prev]);
+        try {
+          // Save to BACKEND using the backend hook (saves AND updates local state)
+          const savedEntry = await backendAddCashbookEntry(newCashbookEntry);
+          repairedCount++;
+          successfullyRepairedIds.push(savedEntry.id);
+          console.log(`✅ [${i + 1}/${missingEntries.length}] SUCCESS: ${transaction.clientName} - Entry ID: ${savedEntry.id}`);
+        } catch (err) {
+          console.error(`❌ [${i + 1}/${missingEntries.length}] FAILED: ${transaction.clientName}:`, err);
+          // Continue with other entries even if one fails
+        }
         
-        repairedCount++;
-        console.log(`✅ Repaired ${repairedCount}/${missingEntries.length}: ${transaction.clientName} - ${formatUGX(transaction.amount)}`);
+        // Small delay between requests to avoid overwhelming the backend
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       
-      console.log(`✅ DATA REPAIR COMPLETE: Added ${repairedCount} missing cashbook entries`);
+      console.log(`✅ DATA REPAIR COMPLETE: Successfully saved ${repairedCount}/${missingEntries.length} entries`);
+      console.log(`📝 Repaired Entry IDs:`, successfullyRepairedIds);
+      
+      if (repairedCount === 0) {
+        toast.dismiss(loadingToast);
+        toast.error('❌ Failed to repair any entries. Check console for details.');
+        return;
+      }
+      
+      // Add a 3-second delay to ensure backend has processed all saves
+      console.log('⏳ Waiting 1 second for backend to finalize...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // ⚠️ TEMPORARY: Skip reload until backend limit fix is deployed
+      // The backend is still returning only 1000 entries, which overwrites our repaired entries
+      // Once the kv_store.tsx fix deploys (with .order() and .limit(50000)), uncomment this:
+      // console.log('🔄 Reloading all data from backend...');
+      // await reloadData();
+      // await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log('🔍 Verifying repaired entries are in current state...');
+      console.log(`📊 Cashbook entries in state: ${cashbookEntries.length}`);
+      console.log(`📊 Looking for repaired IDs:`, successfullyRepairedIds);
+      
+      // Verify at least some entries were saved
+      const foundCount = successfullyRepairedIds.filter(id => 
+        cashbookEntries.some(entry => entry.id === id)
+      ).length;
+      console.log(`✅ Found ${foundCount}/${successfullyRepairedIds.length} repaired entries in cashbook`);
+      
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+      
       toast.success(`✅ Data Repair Complete! Added ${repairedCount} missing cashbook entries.`, {
         duration: 8000,
       });
       
-      // Reload all data to ensure consistency
-      await reloadData();
+      // Show warning about not refreshing until backend deploys
+      toast.info('ℹ️ Entries saved! DO NOT refresh the page until we confirm backend deployment.', {
+        duration: 10000,
+      });
       
     } catch (error) {
       console.error('❌ Data repair failed:', error);
-      toast.error('Data repair failed. Please contact support.');
+      // Dismiss loading toast if it exists
+      if (loadingToast) {
+        toast.dismiss(loadingToast);
+      }
+      toast.error(`Data repair failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please check console for details.`);
     }
   };
 
@@ -1334,8 +1387,9 @@ Call: +256709907775`;
       const entryGroups = new Map<string, CashbookEntry[]>();
       
       cashbookEntries.forEach(entry => {
-        // Create a unique key based on date, amount, description, and type
-        const key = `${entry.date}_${entry.amount}_${entry.description}_${entry.type}`;
+        // Create a unique key based on date, time, description, amount, and type
+        // This identifies true duplicates (same transaction recorded multiple times)
+        const key = `${entry.date}_${entry.time}_${entry.description}_${entry.amount}_${entry.type}`;
         
         if (!entryGroups.has(key)) {
           entryGroups.set(key, []);
@@ -1353,35 +1407,46 @@ Call: +256709907775`;
       });
       
       if (duplicateGroups.length === 0) {
-        toast.success('✅ No duplicate entries found! Your cashbook is clean.');
+        toast.success('✅ No duplicate entries found! Your cashbook is clean.', {
+          duration: 5000,
+        });
         return;
       }
       
       // Calculate how many duplicates will be removed
       let totalDuplicates = 0;
+      const duplicateDetails: string[] = [];
       duplicateGroups.forEach(group => {
         totalDuplicates += group.length - 1; // Keep 1, remove the rest
+        const sample = group[0];
+        duplicateDetails.push(`  • ${sample.description} - UGX ${sample.amount.toLocaleString()} (${sample.date} ${sample.time}) - ${group.length} copies`);
       });
       
       console.log(`📊 Found ${duplicateGroups.length} groups with duplicates`);
       console.log(`🗑️ Total duplicate entries to remove: ${totalDuplicates}`);
+      console.log('📋 Duplicate details:', duplicateDetails);
       
       // Confirm with user
       const confirmed = window.confirm(
         `🧹 DUPLICATE CLEANUP\n\n` +
-        `Found ${totalDuplicates} duplicate cashbook entries.\n\n` +
+        `Found ${totalDuplicates} duplicate cashbook entries in ${duplicateGroups.length} groups.\n\n` +
+        `Examples:\n${duplicateDetails.slice(0, 5).join('\n')}\n` +
+        (duplicateDetails.length > 5 ? `  ... and ${duplicateDetails.length - 5} more groups\n\n` : '\n') +
         `This will:\n` +
-        `• Keep the first entry from each duplicate group\n` +
-        `• Remove ${totalDuplicates} duplicate entries from the database\n` +
-        `• Free up storage space\n\n` +
+        `• Keep the FIRST entry from each duplicate group\n` +
+        `• Remove ${totalDuplicates} duplicate entries permanently\n` +
+        `• Update your cashbook balance\n\n` +
+        `⚠️ This action cannot be undone!\n\n` +
         `Do you want to proceed with cleanup?`
       );
       
       if (!confirmed) {
         console.log('❌ User cancelled cleanup');
+        toast.info('Cleanup cancelled. No changes made.');
         return;
       }
       
+      const loadingToast = toast.loading('🧹 Removing duplicates from database...');
       console.log('🔄 Removing duplicates from database...');
       let removedCount = 0;
       const idsToRemove: string[] = [];
@@ -1401,7 +1466,7 @@ Call: +256709907775`;
         const toKeep = sorted[0];
         const toRemove = sorted.slice(1);
         
-        console.log(`   📌 Keeping: ${toKeep.id} - ${toKeep.description} (${toKeep.date})`);
+        console.log(`   📌 Keeping: ${toKeep.id} - ${toKeep.description} (${toKeep.date} ${toKeep.time})`);
         
         for (const duplicate of toRemove) {
           try {
@@ -1431,9 +1496,11 @@ Call: +256709907775`;
         return filtered;
       });
       
-      // Also reload from database to confirm
-      console.log('🔄 Reloading all data from database to verify...');
-      await reloadData();
+      // ⚠️ TEMPORARY: Skip reload until backend limit fix is deployed
+      // await reloadData();
+      
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
       
       toast.success(`🧹 Cleanup Complete! Removed ${removedCount} duplicate entries.`, {
         duration: 8000,
@@ -1571,6 +1638,7 @@ Call: +256709907775`;
             onCleanupDuplicates={handleCleanupDuplicates}
             onRefreshData={reloadData}
             onDeleteEntry={handleDeleteCashbook}
+            onRepairCashbook={repairMissingCashbookEntries}
             currentUser={currentUser}
           />
         )}

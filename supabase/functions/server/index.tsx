@@ -161,9 +161,18 @@ app.delete('/make-server-7f28f6fd/transactions/:id', async (c) => {
 app.get('/make-server-7f28f6fd/cashbook', async (c) => {
   try {
     const entries = await kv.getByPrefix('cashbook:');
+    console.log(`📖 BACKEND: Fetching cashbook entries - Found ${entries?.length || 0} entries`);
+    
+    // Log a few repair entry IDs if they exist (for debugging)
+    const repairEntries = entries?.filter((e: any) => e.id?.includes('repair')) || [];
+    if (repairEntries.length > 0) {
+      console.log(`🔧 BACKEND: Found ${repairEntries.length} repair entries`);
+      console.log(`🔧 Sample repair IDs:`, repairEntries.slice(0, 3).map((e: any) => e.id));
+    }
+    
     return c.json({ entries: entries || [] });
   } catch (error) {
-    console.log('Error fetching cashbook entries:', error);
+    console.log('❌ BACKEND ERROR: Failed to fetch cashbook entries:', error);
     return c.json({ error: 'Failed to fetch cashbook entries', details: String(error) }, 500);
   }
 });
@@ -172,10 +181,20 @@ app.get('/make-server-7f28f6fd/cashbook', async (c) => {
 app.post('/make-server-7f28f6fd/cashbook', async (c) => {
   try {
     const entry = await c.req.json();
+    console.log('💾 BACKEND: Saving cashbook entry:', entry.id, '-', entry.description);
     await kv.set(`cashbook:${entry.id}`, entry);
+    
+    // Verify the save by immediately reading it back
+    const verifyRead = await kv.get(`cashbook:${entry.id}`);
+    if (verifyRead) {
+      console.log('✅ BACKEND: Cashbook entry saved & VERIFIED:', entry.id);
+    } else {
+      console.log('⚠️ BACKEND WARNING: Entry saved but verification read failed:', entry.id);
+    }
+    
     return c.json({ entry });
   } catch (error) {
-    console.log('Error adding cashbook entry:', error);
+    console.log('❌ BACKEND ERROR: Failed to add cashbook entry:', error);
     return c.json({ error: 'Failed to add cashbook entry', details: String(error) }, 500);
   }
 });

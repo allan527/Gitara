@@ -1,0 +1,128 @@
+ Running frontend commit bf7e92fde14bce17ce7839702f7b03b902ddee1b
+vendor-core-1bd83872bdc961a7.min.js.br:54 Statsig is not ready to log exposures, will retry in 1 seconds
+(anonymous) @ vendor-core-1bd83872bdc961a7.min.js.br:54
+vendor-core-1bd83872bdc961a7.min.js.br:54 [import] git: 0e7d64904fd400e3b25164dad228ae255514d344, stamp: A19154625D587A0A
+vendor-core-1bd83872bdc961a7.min.js.br:54 Loaded 50 scripts (7285629b), 50 from cache (7285629b)
+vendor-core-1bd83872bdc961a7.min.js.br:54 [Sprigma] Sprig SDK is ready
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: <URL>
+metrics_batched:1  Failed to load resource: the server responded with a status of 400 ()
+metrics_batched:1  Failed to load resource: the server responded with a status of 400 ()
+vendor-core-1bd83872bdc961a7.min.js.br:54 [file_browser.navigation_mark] You appear to be logging a relative timestamp and not an epoch timestamp. Try adding performance.timeOrigin to the timestamp.
+(anonymous) @ vendor-core-1bd83872bdc961a7.min.js.br:54
+figma_app__react_profile-e654cdbc62334079.min.js.br:218 [Intervention] Slow network is detected. See https://www.chromestatus.com/feature/5636954674692096 for more details. Fallback font will be used while loading: https://static.figma.com/webfont/1/SourceCodePro-Medium.woff2
+figma_app__react_profile-e654cdbc62334079.min.js.br:397 The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127
+initialize @ figma_app__react_profile-e654cdbc62334079.min.js.br:397
+vendor-core-1bd83872bdc961a7.min.js.br:54 Autosave Changes not available or already claimed by another tab undefined
+vendor-core-1bd83872bdc961a7.min.js.br:54 [Fullscreen] Booting... (emscripten version 4.0.21)
+vendor-core-1bd83872bdc961a7.min.js.br:54 [GPU] graphicsAPI:"WebGPU", vendor:"Google Inc. (Intel)" renderer:"ANGLE (Intel, Intel(R) HD Graphics 520 (0x00001916) Direct3D11 vs_5_0 ps_5_0, D3D11)" deviceArchitecture:"gen-9" deviceDescription:"" webGPUDevice:"" webGPUVendor:"intel" bindings:"emdawnwebgpu"
+vendor-core-1bd83872bdc961a7.min.js.br:54 [Fullscreen] Ready in 1082.7ms
+vendor-core-1bd83872bdc961a7.min.js.br:54 [FullscreenApp] calling setEditorTheme and setting preference light
+vendor-core-1bd83872bdc961a7.min.js.br:54 [MultiplayerSession] connecting to wss://www.figma.com/api/multiplayer/pyX6TFt4VAjEYRrUP75LOL?role=editor&tracking_session_id=rOYY8HXbFyPflsN1&version=151&recentReload=0&file-load-streaming-compression&user-id=1592678031593742247&client_release=bf7e92fde14bce17ce7839702f7b03b902ddee1b
+vendor-core-1bd83872bdc961a7.min.js.br:54 [FullscreenApp] calling setEditorTheme and setting preference light
+vendor-core-1bd83872bdc961a7.min.js.br:54 [MultiplayerSession] Joining file version 106 (initial load)
+vendor-core-1bd83872bdc961a7.min.js.br:54 Migration succeeded: context: fullscreen_migrate_SceneGraphManager, version: 106, duration: 1ms.
+vendor-core-1bd83872bdc961a7.min.js.br:54 [devtools] Initialized LS
+vendor-core-1bd83872bdc961a7.min.js.br:54 [devtools] Initialized LS
+/api/make/fetch_ds_code_gen_status:1  Failed to load resource: the server responded with a status of 400 ()
+vendor-core-1bd83872bdc961a7.min.js.br:54 [Fullscreen] loadtime=8.26s maxmem=67111940
+vendor-core-1bd83872bdc961a7.min.js.br:54 Too many elapsed hits of react since last report
+(anonymous) @ vendor-core-1bd83872bdc961a7.min.js.br:54
+ ✅ All data loaded from backend successfully
+ 🔧 STARTING DATA REPAIR: Checking for missing cashbook entries...
+ 📊 Total payment transactions to check: 733
+ 📊 Existing loan repayment cashbook entries: 723
+ 🚨 FOUND 9 MISSING CASHBOOK ENTRIES!
+ 🔄 Repairing cashbook entries...
+ ✅ Repaired 1/9: Taremwa peter  - UGX 10,000
+ ✅ Repaired 2/9: Ssemujju jovan - UGX 5,000
+ ✅ Repaired 3/9: Ssebwanyi Francis - UGX 7,500
+ ✅ Repaired 4/9: Natabi phionah - UGX 6,000
+ ✅ Repaired 5/9: Bamboneyeho felix - UGX 12,000
+ ✅ Repaired 6/9: Nalubega annet - UGX 30,000
+ ✅ Repaired 7/9: Nakityo annet - UGX 17,500
+ ✅ Repaired 8/9: Nayilima hellen - UGX 10,000
+ ✅ Repaired 9/9: Namulwana mouren - UGX 16,000
+ ✅ DATA REPAIR COMPLETE: Added 9 missing cashbook entries
+ ✅ All data loaded from backend successfully
+ 🔧 STARTING DATA REPAIR: Checking for missing cashbook entries...
+ 📊 Total payment transactions to check: 733
+ 📊 Existing loan repayment cashbook entries: 723
+ 🚨 FOUND 9 MISSING CASHBOOK ENTRIES!
+ ❌ User cancelled data repair
+ 8:06:37 PM [vite] (client) hmr update /src/app/App.tsx, /src/styles/index.css
+ 🔧 STARTING DATA REPAIR: Checking for missing cashbook entries...
+ 📊 Total payment transactions to check: 733
+ 📊 Existing loan repayment cashbook entries: 723
+ 🚨 FOUND 9 MISSING CASHBOOK ENTRIES!
+ 🔄 Repairing cashbook entries...
+ ⏳ Waiting for all repairs to save to backend...
+ ✅ Repaired 1/9: Taremwa peter  - UGX 10,000
+ ✅ Repaired 2/9: Ssemujju jovan - UGX 5,000
+ ✅ Repaired 3/9: Ssebwanyi Francis - UGX 7,500
+ ✅ Repaired 4/9: Namulwana mouren - UGX 16,000
+ ✅ Repaired 5/9: Nalubega annet - UGX 30,000
+ ✅ Repaired 6/9: Natabi phionah - UGX 6,000
+ ✅ Repaired 7/9: Nayilima hellen - UGX 10,000
+ ✅ Repaired 8/9: Bamboneyeho felix - UGX 12,000
+ ✅ Repaired 9/9: Nakityo annet - UGX 17,500
+ ✅ DATA REPAIR COMPLETE: Added 9 missing cashbook entries
+ ⏳ Waiting 2 seconds for backend to finalize...
+ 🔄 Reloading all data from backend...
+ ✅ All data loaded from backend successfully
+ ✅ All data loaded from backend successfully
+ ✅ All data loaded from backend successfully
+ 🔧 STARTING DATA REPAIR: Checking for missing cashbook entries...
+ 📊 Total payment transactions to check: 733
+ 📊 Existing loan repayment cashbook entries: 723
+ 🚨 FOUND 9 MISSING CASHBOOK ENTRIES!
+ ❌ User cancelled data repair
+code_components_preview_iframe-45c712baf9cbf8c8.min.js.br:28 ✅ All data loaded from backend successfully
+ 8:12:25 PM [vite] (client) hmr update /src/app/App.tsx, /src/styles/index.css
+ ✅ All data loaded from backend successfully
+ 🔧 STARTING DATA REPAIR: Checking for missing cashbook entries...
+ 📊 Total payment transactions to check: 733
+ 📊 Existing loan repayment cashbook entries: 723
+ 🚨 FOUND 9 MISSING CASHBOOK ENTRIES!
+ 🔄 Repairing cashbook entries...
+ 📋 Will repair 9 entries
+ 💾 [1/9] Saving: Taremwa peter  - UGX 10,000
+ ✅ [1/9] SUCCESS: Taremwa peter  - Entry ID: c1772305949559_repair_0
+ 💾 [2/9] Saving: Ssemujju jovan - UGX 5,000
+ ✅ [2/9] SUCCESS: Ssemujju jovan - Entry ID: c1772305957126_repair_1
+ 💾 [3/9] Saving: Ssebwanyi Francis - UGX 7,500
+ ✅ [3/9] SUCCESS: Ssebwanyi Francis - Entry ID: c1772305964168_repair_2
+ 💾 [4/9] Saving: Natabi phionah - UGX 6,000
+ ✅ [4/9] SUCCESS: Natabi phionah - Entry ID: c1772305971112_repair_3
+ 💾 [5/9] Saving: Bamboneyeho felix - UGX 12,000
+ ✅ [5/9] SUCCESS: Bamboneyeho felix - Entry ID: c1772305978065_repair_4
+ 💾 [6/9] Saving: Nalubega annet - UGX 30,000
+ ✅ [6/9] SUCCESS: Nalubega annet - Entry ID: c1772305985500_repair_5
+ 💾 [7/9] Saving: Nakityo annet - UGX 17,500
+ ✅ [7/9] SUCCESS: Nakityo annet - Entry ID: c1772305992332_repair_6
+ 💾 [8/9] Saving: Nayilima hellen - UGX 10,000
+ ✅ [8/9] SUCCESS: Nayilima hellen - Entry ID: c1772305999919_repair_7
+ 💾 [9/9] Saving: Namulwana mouren - UGX 16,000
+ ✅ [9/9] SUCCESS: Namulwana mouren - Entry ID: c1772306008717_repair_8
+ ✅ DATA REPAIR COMPLETE: Successfully saved 9/9 entries
+ 📝 Repaired Entry IDs: Array(9)
+ ⏳ Waiting 3 seconds for backend to finalize...
+ 🔄 Reloading all data from backend...
+ ✅ All data loaded from backend successfully
+ 🔍 Verifying repaired entries are in cashbook...
+ 📊 Cashbook entries after reload: 1000
+ 📊 Looking for repaired IDs: Array(9)
+ ✅ Found 0/9 repaired entries in cashbook
